@@ -1,5 +1,4 @@
 from .base_settings import *
-import os
 
 INSTALLED_APPS += [
     'uw_person_client',
@@ -8,14 +7,16 @@ INSTALLED_APPS += [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'HOST': 'localhost',
+        'HOST': 'db',
         'PORT': '5432',
-        'NAME': 'testdb',
-        'USER': 'tester',
-        'PASSWORD': 'tester',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
     },
 }
 
 MIGRATION_MODULES = {
     'uw_person_client': 'uw_person_client.test_migrations',
 }
+
+FIXTURE_DIRS = ['uw_person_client/fixtures']

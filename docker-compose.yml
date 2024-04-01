@@ -6,10 +6,6 @@ services:
       ENV: localdev
       DB: postgres
       PORT: 8000
-      SQL_HOST: localhost
-      SQL_PORT: 5432
-    restart: always
-    container_name: app-person-client
     build:
       context: .
       target: app-container
@@ -22,11 +18,5 @@ services:
       - db
   db:
     image: postgres:14
-    volumes:
-      - postgres_data:/postgresql/data/
     environment:
-      - POSTGRES_USER=tester
-      - POSTGRES_PASSWORD=tester
-      - POSTGRES_DB=testdb
-volumes:
-  postgres_data:
+      POSTGRES_PASSWORD: postgres

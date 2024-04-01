@@ -2,7 +2,76 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from django.db import models
+from django.db.models import Q
 from django.contrib.postgres.fields import ArrayField
+from uw_person_client.exceptions import (
+    PersonNotFoundException, AdviserNotFoundException)
+
+
+class PersonManager(models.Manager):
+    def _related(self, queryset, **kwargs):
+        related_fields = []
+        if kwargs.get('include_employee'):
+            related_fields.append('employee')
+        if kwargs.get('include_student'):
+            related_fields.append('student')
+            if kwargs.get('include_student_transcripts'):
+                related_fields.append('transcript')
+            if kwargs.get('include_student_transfers'):
+                related_fields.append('transfer')
+            if kwargs.get('include_student_sports'):
+                related_fields.append('sport')
+            if kwargs.get('include_student_advisers'):
+                related_fields.append('adviser')
+            if kwargs.get('include_student_majors'):
+                related_fields.append('major')
+            if kwargs.get('include_student_holds'):
+                related_fields.append('studenthold')
+            if kwargs.get('include_student_degrees'):
+                related_fields.append('degree')
+
+        if len(related_fields):
+            queryset.prefetch_related(*related_fields)
+
+        return queryset
+
+    def get_person_by_uwnetid(self, uwnetid, **kwargs):
+        queryset = super().get_queryset().filter(
+            Q(uwnetid=uwnetid) | Q(prior_uwnetids__contains=[uwnetid]))
+
+        try:
+            return self._related(queryset, **kwargs).get().values()
+        except Person.DoesNotExist:
+            raise PersonNotFoundException(uwnetid)
+
+    def get_person_by_uwregid(self, uwregid, **kwargs):
+        queryset = super().get_queryset().filter(
+            Q(uwregid=uwregid) | Q(prior_uwregids__contains=[uwregid]))
+
+        try:
+            return self._related(queryset, **kwargs).get().values()
+        except Person.DoesNotExist:
+            raise PersonNotFoundException(uwregid)
+
+    def get_person_by_system_key(self, system_key, **kwargs):
+        queryset = super().get_queryset().filter(system_key=system_key)
+
+        try:
+            return self._related(queryset, **kwargs).get().values()
+        except Person.DoesNotExist:
+            raise PersonNotFoundException(system_key)
+
+    def get_person_by_student_number(self, student_number, **kwargs):
+        pass
+
+    def get_active_students(self, **kwargs):
+        pass
+
+    def get_active_employees(self, **kwargs):
+        pass
+
+    def get_advisers(self, advising_program=None, **kwargs):
+        pass
 
 
 class Person(models.Model):
@@ -27,9 +96,17 @@ class Person(models.Model):
     prior_uwnetids = ArrayField(models.CharField(max_length=24))
     prior_uwregids = ArrayField(models.CharField(max_length=32))
 
+    objects = PersonManager()
+
     class Meta:
         managed = False
         db_table = 'person'
+
+    def save(self, *args, **kwargs):
+        raise NotImplemented()
+
+    def delete(self, *args, **kwargs):
+        raise NotImplemented()
 
 
 class Employee(models.Model):
@@ -47,6 +124,12 @@ class Employee(models.Model):
         managed = False
         db_table = 'employee'
 
+    def save(self, *args, **kwargs):
+        raise NotImplemented()
+
+    def delete(self, *args, **kwargs):
+        raise NotImplemented()
+
 
 class Adviser(models.Model):
     employee = models.ForeignKey(Employee, models.DO_NOTHING)
@@ -63,6 +146,12 @@ class Adviser(models.Model):
         managed = False
         db_table = 'adviser'
 
+    def save(self, *args, **kwargs):
+        raise NotImplemented()
+
+    def delete(self, *args, **kwargs):
+        raise NotImplemented()
+
 
 class Term(models.Model):
     year = models.SmallIntegerField()
@@ -72,6 +161,12 @@ class Term(models.Model):
         managed = False
         db_table = 'term'
         unique_together = (('year', 'quarter'),)
+
+    def save(self, *args, **kwargs):
+        raise NotImplemented()
+
+    def delete(self, *args, **kwargs):
+        raise NotImplemented()
 
 
 class Major(models.Model):
@@ -116,6 +211,12 @@ class Major(models.Model):
         managed = False
         db_table = 'major'
 
+    def save(self, *args, **kwargs):
+        raise NotImplemented()
+
+    def delete(self, *args, **kwargs):
+        raise NotImplemented()
+
 
 class Sport(models.Model):
     sport_code = models.TextField(blank=True, null=True)
@@ -129,6 +230,12 @@ class Sport(models.Model):
     class Meta:
         managed = False
         db_table = 'sport'
+
+    def save(self, *args, **kwargs):
+        raise NotImplemented()
+
+    def delete(self, *args, **kwargs):
+        raise NotImplemented()
 
 
 class Student(models.Model):
@@ -279,6 +386,12 @@ class Student(models.Model):
         managed = False
         db_table = 'student'
 
+    def save(self, *args, **kwargs):
+        raise NotImplemented()
+
+    def delete(self, *args, **kwargs):
+        raise NotImplemented()
+
 
 class StudentHold(models.Model):
     student = models.ForeignKey(Student, models.DO_NOTHING)
@@ -295,6 +408,12 @@ class StudentHold(models.Model):
         db_table = 'student_hold'
         unique_together = (('student', 'seq'),)
 
+    def save(self, *args, **kwargs):
+        raise NotImplemented()
+
+    def delete(self, *args, **kwargs):
+        raise NotImplemented()
+
 
 class StudentToAdviser(models.Model):
     student = models.ForeignKey(Student, models.DO_NOTHING)
@@ -305,6 +424,12 @@ class StudentToAdviser(models.Model):
         db_table = 'student_to_adviser'
         unique_together = (('student', 'adviser'),)
 
+    def save(self, *args, **kwargs):
+        raise NotImplemented()
+
+    def delete(self, *args, **kwargs):
+        raise NotImplemented()
+
 
 class StudentToSport(models.Model):
     student = models.ForeignKey(Student, models.DO_NOTHING)
@@ -314,6 +439,12 @@ class StudentToSport(models.Model):
         managed = False
         db_table = 'student_to_sport'
         unique_together = (('student', 'sport'),)
+
+    def save(self, *args, **kwargs):
+        raise NotImplemented()
+
+    def delete(self, *args, **kwargs):
+        raise NotImplemented()
 
 
 class Degree(models.Model):
@@ -354,6 +485,12 @@ class Degree(models.Model):
         unique_together = ((
             'student', 'degree_term', 'campus_code', 'degree_abbr_code',
             'degree_pathway_num'),)
+
+    def save(self, *args, **kwargs):
+        raise NotImplemented()
+
+    def delete(self, *args, **kwargs):
+        raise NotImplemented()
 
 
 class Transcript(models.Model):
@@ -409,6 +546,12 @@ class Transcript(models.Model):
         managed = False
         db_table = 'transcript'
 
+    def save(self, *args, **kwargs):
+        raise NotImplemented()
+
+    def delete(self, *args, **kwargs):
+        raise NotImplemented()
+
 
 class Transfer(models.Model):
     student = models.ForeignKey(Student, models.DO_NOTHING)
@@ -441,3 +584,9 @@ class Transfer(models.Model):
     class Meta:
         managed = False
         db_table = 'transfer'
+
+    def save(self, *args, **kwargs):
+        raise NotImplemented()
+
+    def delete(self, *args, **kwargs):
+        raise NotImplemented()
