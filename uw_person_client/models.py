@@ -50,46 +50,48 @@ class PersonManager(models.Manager):
 
         return person
 
-    def get_person_by_uwnetid(self, uwnetid, **kwargs):
+    def _get_person(self, queryset, **kwargs):
         related_fields = self._include(**kwargs)
-        queryset = super().get_queryset().filter(
-            Q(uwnetid=uwnetid) | Q(prior_uwnetids__contains=[uwnetid]))
 
         if len(related_fields):
             queryset.prefetch_related(*related_fields)
 
+        return self._assemble(queryset.get(), **kwargs)
+
+    def get_person_by_uwnetid(self, uwnetid, **kwargs):
+        queryset = super().get_queryset().filter(
+            Q(uwnetid=uwnetid) | Q(prior_uwnetids__contains=[uwnetid]))
+
         try:
-            return self._assemble(queryset.get(), **kwargs)
+            return self._get_person(queryset, **kwargs)
         except Person.DoesNotExist:
             raise PersonNotFoundException(uwnetid)
 
     def get_person_by_uwregid(self, uwregid, **kwargs):
-        related_fields = self._include(**kwargs)
         queryset = super().get_queryset().filter(
             Q(uwregid=uwregid) | Q(prior_uwregids__contains=[uwregid]))
 
-        if len(related_fields):
-            queryset.prefetch_related(*related_fields)
-
         try:
-            return self._assemble(queryset.get(), **kwargs)
+            return self._get_person(queryset, **kwargs)
         except Person.DoesNotExist:
             raise PersonNotFoundException(uwregid)
 
     def get_person_by_system_key(self, system_key, **kwargs):
-        related_fields = self._include(**kwargs)
         queryset = super().get_queryset().filter(system_key=system_key)
 
-        if len(related_fields):
-            queryset.prefetch_related(*related_fields)
-
         try:
-            return self._assemble(queryset.get(), **kwargs)
+            return self._get_person(queryset, **kwargs)
         except Person.DoesNotExist:
             raise PersonNotFoundException(system_key)
 
     def get_person_by_student_number(self, student_number, **kwargs):
-        pass
+        queryset = super().get_queryset().filter(
+            student__student_number=student_number)
+
+        try:
+            return self._get_person(queryset, **kwargs)
+        except Person.DoesNotExist:
+            raise PersonNotFoundException(student_number)
 
     def get_active_students(self, **kwargs):
         pass

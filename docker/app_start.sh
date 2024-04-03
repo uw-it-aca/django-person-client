@@ -14,6 +14,5 @@ if [ "$ENV"  = "localdev" ]
 then
 
   python manage.py migrate
-  #python manage.py loaddata person.json employee.json term.json major.json student.json adviser.json transfer.json transcript.json hold.json sport.json
 
 fi

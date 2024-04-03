@@ -27,7 +27,6 @@ name: tests
 
 env:
   APP_NAME: uw_person_client
-  CONF_PATH: conf
   COVERAGE_DJANGO_VERSION: 4.2
   POSTGRES_HOST: postgres
   POSTGRES_PORT: 5432
@@ -45,11 +44,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-22.04
-
-    strategy:
-      matrix:
-        django-version:
-          - '4.2'
 
     services:
       postgres:
@@ -73,41 +67,60 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .
-          pip install coverage coveralls==3.3.1
-
-      - name: Upgrade Django Version
-        run: pip install "Django~=${{ matrix.django-version }}.0"
-
-      - name: Setup Django
-        run: |
-          django-admin startproject project .
-          test -f ${CONF_PATH}/urls.py && cp ${CONF_PATH}/urls.py project/
-          test -f ${CONF_PATH}/settings.py && cat ${CONF_PATH}/settings.py >> project/settings.py
-
       - name: Run Python Linters
         uses: uw-it-aca/actions/python-linters@main
         with:
           app_name: ${APP_NAME}
           exclude_paths: 'test_migrations'
 
-      - name: Run Migrations
-        run: python manage.py migrate
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: Run Tests
-        run: |
-          python -m compileall ${APP_NAME}/
-          python -Wd -m coverage run --source=${APP_NAME}/ manage.py test ${APP_NAME}
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-$(echo ${{ hashFiles('Dockerfile') }} | head -c 16)
+          restore-keys: |
+            ${{ runner.os }}-buildx-
 
-      - name: Report Test Coverage
-        if: matrix.django-version == env.COVERAGE_DJANGO_VERSION
+      - name: Build App Image
+        uses: docker/build-push-action@v3
+        with:
+          target: app-container
+          tags: ${{ needs.context.outputs.image_tag }}
+          push: false
+          load: true
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Build Test Image
+        uses: docker/build-push-action@v3
+        with:
+          target: app-test-container
+          tags: app-test-container
+          push: false
+          load: true
+
+      - name: Run Tests in Image
+        id: tests
+        shell: bash
+        run: >-
+          docker run -u root -t
+          -v ${PWD}:/coverage
+          -e DJANGO_APP="$APP_NAME"
+          -e "ENV=localdev"
+          app-test-container
+          bash -c ". ./docker/test.sh"
+
+      - name: Record Test Results
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
-        run: coveralls
+        run: |
+          python -m pip install --upgrade pip coverage coveralls==3.3.1
+          coverage combine
+          coveralls
 
   publish:
     if: github.event_name == 'release' && startsWith(github.ref, 'refs/tags')
