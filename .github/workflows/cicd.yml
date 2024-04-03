@@ -51,11 +51,11 @@ jobs:
       image_tag: ${{ steps.context.outputs.image_tag }}
 
       steps:
-      - name: Set up Context
-        id: context
-        uses: uw-it-aca/actions/cicd-context@main
-        with:
-          release_name: ${{ env.APP_NAME }}
+        - name: Set up Context
+          id: context
+          uses: uw-it-aca/actions/cicd-context@main
+          with:
+            release_name: ${{ env.APP_NAME }}
 
   build:
     runs-on: ubuntu-22.04
