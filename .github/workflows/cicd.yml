@@ -27,8 +27,6 @@ name: Build, Test and Publish
 
 env:
   DJANGO_APP: uw_person_client
-  POSTGRES_HOST: postgres
-  POSTGRES_PORT: 5432
 
 on:
   push:
@@ -58,6 +56,22 @@ jobs:
     runs-on: ubuntu-22.04
 
     needs: context
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
 
     steps:
       - name: Checkout Repo
@@ -106,10 +120,13 @@ jobs:
       - name: Run Tests in Image
         id: tests
         shell: bash
-        run: |
-          docker network create app-net
-          docker run -d --net app-net --name ${POSTGRES_HOST} -p ${POSTGRES_PORT}:${POSTGRES_PORT} postgres:14
-          docker run -u root -t -v --net app-net ${PWD}:/coverage -e DJANGO_APP="$DJANGO_APP" -e POSTGRES_HOST="$POSTGRES_HOST" -e POSTGRES_PORT="$POSTGRES_PORT" -e "ENV=localdev" app-test-container bash -c ". ./docker/test.sh"
+        run: >-
+          docker run -u root -t
+          -v ${PWD}:/coverage
+          -e DJANGO_APP="$DJANGO_APP"
+          -e "ENV=localdev"
+          app-test-container
+          bash -c ". ./docker/test.sh"
 
       - name: Record Test Results
         env:
