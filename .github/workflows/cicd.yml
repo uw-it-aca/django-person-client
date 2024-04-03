@@ -26,8 +26,7 @@
 name: tests
 
 env:
-  APP_NAME: uw_person_client
-  COVERAGE_DJANGO_VERSION: 4.2
+  DJANGO_APP: uw_person_client
   POSTGRES_HOST: postgres
   POSTGRES_PORT: 5432
 
@@ -55,7 +54,7 @@ jobs:
         id: context
         uses: uw-it-aca/actions/cicd-context@main
         with:
-          release_name: ${{ env.APP_NAME }}
+          release_name: ${{ env.DJANGO_APP }}
 
   build:
     runs-on: ubuntu-22.04
@@ -87,7 +86,7 @@ jobs:
       - name: Run Python Linters
         uses: uw-it-aca/actions/python-linters@main
         with:
-          app_name: ${APP_NAME}
+          app_name: ${DJANGO_APP}
           exclude_paths: 'test_migrations'
 
       - name: Set up Docker Buildx
@@ -125,7 +124,7 @@ jobs:
         run: >-
           docker run -u root -t
           -v ${PWD}:/coverage
-          -e DJANGO_APP="$APP_NAME"
+          -e DJANGO_APP="$DJANGO_APP"
           -e "ENV=localdev"
           app-test-container
           bash -c ". ./docker/test.sh"
@@ -158,6 +157,6 @@ jobs:
       - name: Publish to PyPi
         uses: uw-it-aca/actions/publish-pypi@main
         with:
-          app_name: ${APP_NAME}
+          app_name: ${DJANGO_APP}
           tag_name: ${{ github.event.release.tag_name }}
           api_token: ${{ secrets.PYPI_API_TOKEN }}
