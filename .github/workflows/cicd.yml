@@ -42,8 +42,25 @@ on:
     types: [published]
 
 jobs:
-  test:
+  context:
     runs-on: ubuntu-22.04
+
+    outputs:
+      commit_hash: ${{ steps.context.outputs.commit_hash }}
+      git_repo_branch: ${{ steps.context.outputs.git_repo_branch }}
+      image_tag: ${{ steps.context.outputs.image_tag }}
+
+      steps:
+      - name: Set up Context
+        id: context
+        uses: uw-it-aca/actions/cicd-context@main
+        with:
+          release_name: ${{ env.APP_NAME }}
+
+  build:
+    runs-on: ubuntu-22.04
+
+    needs: context
 
     services:
       postgres:
@@ -125,7 +142,7 @@ jobs:
   publish:
     if: github.event_name == 'release' && startsWith(github.ref, 'refs/tags')
 
-    needs: test
+    needs: build
 
     runs-on: ubuntu-22.04
 
