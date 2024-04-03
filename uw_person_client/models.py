@@ -4,60 +4,87 @@
 from django.db import models
 from django.db.models import Q
 from django.contrib.postgres.fields import ArrayField
+from django.forms import model_to_dict
 from uw_person_client.exceptions import (
     PersonNotFoundException, AdviserNotFoundException)
 
 
 class PersonManager(models.Manager):
-    def _related(self, queryset, **kwargs):
+    def _include(self, **kwargs):
         related_fields = []
         if kwargs.get('include_employee'):
-            related_fields.append('employee')
+            related_fields.append('employee_set')
         if kwargs.get('include_student'):
-            related_fields.append('student')
+            related_fields.append('student_set')
             if kwargs.get('include_student_transcripts'):
-                related_fields.append('transcript')
+                related_fields.append('transcript_set')
             if kwargs.get('include_student_transfers'):
-                related_fields.append('transfer')
-            if kwargs.get('include_student_sports'):
-                related_fields.append('sport')
-            if kwargs.get('include_student_advisers'):
-                related_fields.append('adviser')
-            if kwargs.get('include_student_majors'):
-                related_fields.append('major')
+                related_fields.append('transfer_set')
             if kwargs.get('include_student_holds'):
-                related_fields.append('studenthold')
+                related_fields.append('studenthold_set')
             if kwargs.get('include_student_degrees'):
-                related_fields.append('degree')
+                related_fields.append('degree_set')
+        return related_fields
+
+    def _assemble(self, person, **kwargs):
+        if kwargs.get('include_employee'):
+            try:
+                person.employee = person.employee_set.get()
+            except Employee.DoesNotExist:
+                pass
+
+        if kwargs.get('include_student'):
+            try:
+                person.student = person.student_set.get()
+            except Student.DoesNotExist:
+                return person
+
+            if kwargs.get('include_student_transcripts'):
+                person.student.transcripts = person.student.transcript_set
+            if kwargs.get('include_student_transfers'):
+                person.student.transfers = person.student.transfer_set
+            if kwargs.get('include_student_holds'):
+                person.student.holds = person.student.studenthold_set
+            if kwargs.get('include_student_degrees'):
+                person.student.degrees = person.student.degree_set
+
+        return person
+
+    def get_person_by_uwnetid(self, uwnetid, **kwargs):
+        related_fields = self._include(**kwargs)
+        queryset = super().get_queryset().filter(
+            Q(uwnetid=uwnetid) | Q(prior_uwnetids__contains=[uwnetid]))
 
         if len(related_fields):
             queryset.prefetch_related(*related_fields)
 
-        return queryset
-
-    def get_person_by_uwnetid(self, uwnetid, **kwargs):
-        queryset = super().get_queryset().filter(
-            Q(uwnetid=uwnetid) | Q(prior_uwnetids__contains=[uwnetid]))
-
         try:
-            return self._related(queryset, **kwargs).get().values()
+            return self._assemble(queryset.get(), **kwargs)
         except Person.DoesNotExist:
             raise PersonNotFoundException(uwnetid)
 
     def get_person_by_uwregid(self, uwregid, **kwargs):
+        related_fields = self._include(**kwargs)
         queryset = super().get_queryset().filter(
             Q(uwregid=uwregid) | Q(prior_uwregids__contains=[uwregid]))
 
+        if len(related_fields):
+            queryset.prefetch_related(*related_fields)
+
         try:
-            return self._related(queryset, **kwargs).get().values()
+            return self._assemble(queryset.get(), **kwargs)
         except Person.DoesNotExist:
             raise PersonNotFoundException(uwregid)
 
     def get_person_by_system_key(self, system_key, **kwargs):
+        related_fields = self._include(**kwargs)
         queryset = super().get_queryset().filter(system_key=system_key)
 
+        if len(related_fields):
+            queryset.prefetch_related(*related_fields)
+
         try:
-            return self._related(queryset, **kwargs).get().values()
+            return self._assemble(queryset.get(), **kwargs)
         except Person.DoesNotExist:
             raise PersonNotFoundException(system_key)
 
@@ -99,14 +126,40 @@ class Person(models.Model):
     objects = PersonManager()
 
     class Meta:
-        managed = False
         db_table = 'person'
+        managed = False
 
-    def save(self, *args, **kwargs):
-        raise NotImplemented()
+    @property
+    def employee(self):
+        try:
+            return self._employee
+        except AttributeError:
+            pass
 
-    def delete(self, *args, **kwargs):
-        raise NotImplemented()
+    @employee.setter
+    def employee(self, value):
+        self._employee = value
+
+    @property
+    def student(self):
+        try:
+            return self._student
+        except AttributeError:
+            pass
+
+    @student.setter
+    def student(self, value):
+        self._student = value
+
+    def to_dict(self):
+        data = model_to_dict(self)
+        if self.employee is not None:
+            data['employee'] = self.employee.to_dict()
+
+        if self.student is not None:
+            data['student'] = self.student.to_dict()
+
+        return data
 
 
 class Employee(models.Model):
@@ -121,14 +174,11 @@ class Employee(models.Model):
         db_column='_last_changed', blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'employee'
+        managed = False
 
-    def save(self, *args, **kwargs):
-        raise NotImplemented()
-
-    def delete(self, *args, **kwargs):
-        raise NotImplemented()
+    def to_dict(self):
+        return model_to_dict(self)
 
 
 class Adviser(models.Model):
@@ -143,14 +193,11 @@ class Adviser(models.Model):
         db_column='_last_changed', blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'adviser'
+        managed = False
 
-    def save(self, *args, **kwargs):
-        raise NotImplemented()
-
-    def delete(self, *args, **kwargs):
-        raise NotImplemented()
+    def to_dict(self):
+        return model_to_dict(self)
 
 
 class Term(models.Model):
@@ -158,15 +205,12 @@ class Term(models.Model):
     quarter = models.SmallIntegerField()
 
     class Meta:
-        managed = False
         db_table = 'term'
+        managed = False
         unique_together = (('year', 'quarter'),)
 
-    def save(self, *args, **kwargs):
-        raise NotImplemented()
-
-    def delete(self, *args, **kwargs):
-        raise NotImplemented()
+    def to_dict(self):
+        return model_to_dict(self)
 
 
 class Major(models.Model):
@@ -208,14 +252,11 @@ class Major(models.Model):
     major_college_name = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'major'
+        managed = False
 
-    def save(self, *args, **kwargs):
-        raise NotImplemented()
-
-    def delete(self, *args, **kwargs):
-        raise NotImplemented()
+    def to_dict(self):
+        return model_to_dict(self)
 
 
 class Sport(models.Model):
@@ -228,20 +269,19 @@ class Sport(models.Model):
     sport_reg_pr_win = models.BooleanField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'sport'
+        managed = False
 
-    def save(self, *args, **kwargs):
-        raise NotImplemented()
-
-    def delete(self, *args, **kwargs):
-        raise NotImplemented()
+    def to_dict(self):
+        return model_to_dict(self)
 
 
 class Student(models.Model):
     person = models.ForeignKey(Person, models.DO_NOTHING)
     academic_term = models.ForeignKey(
         Term, models.DO_NOTHING, blank=True, null=True)
+    advisers = models.ManyToManyField(Adviser, through='StudentToAdviser')
+    sports = models.ManyToManyField(Sport, through='StudentToSport')
     system_key = models.TextField(unique=True)
     student_number = models.TextField(blank=True, null=True)
     birthdate = models.DateField(blank=True, null=True)
@@ -383,14 +423,88 @@ class Student(models.Model):
     hispanic_group_desc = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'student'
+        managed = False
 
-    def save(self, *args, **kwargs):
-        raise NotImplemented()
+    @property
+    def transcripts(self):
+        try:
+            return self._transcripts
+        except AttributeError:
+            pass
 
-    def delete(self, *args, **kwargs):
-        raise NotImplemented()
+    @transcripts.setter
+    def transcripts(self, value):
+        self._transcripts = value
+
+    @property
+    def transfers(self):
+        try:
+            return self._transfers
+        except AttributeError:
+            pass
+
+    @transfers.setter
+    def transfers(self, value):
+        self._transfers = value
+
+    @property
+    def holds(self):
+        try:
+            return self._holds
+        except AttributeError:
+            pass
+
+    @holds.setter
+    def holds(self, value):
+        self._holds = value
+
+    @property
+    def degrees(self):
+        try:
+            return self._degrees
+        except AttributeError:
+            pass
+
+    @degrees.setter
+    def degrees(self, value):
+        self._degrees = value
+
+    def to_dict(self):
+        data = model_to_dict(self)
+        data['academic_term'] = self.academic_term.to_dict()
+
+        advisers = []
+        for adviser in self.advisers.all():
+            advisers.append(adviser.to_dict())
+        data['advisers'] = advisers
+
+        sports = []
+        for sport in self.sports.all():
+            sports.append(sport.to_dict())
+        data['sports'] = sports
+
+        if self.transcripts is not None:
+            data['transcripts'] = []
+            for transcript in self.transcripts.all():
+                data['transcripts'].append(transcript.to_dict())
+
+        if self.transfers is not None:
+            data['transfers'] = []
+            for transfer in self.transfers.all():
+                data['transfers'].append(transfer.to_dict())
+
+        if self.holds is not None:
+            data['holds'] = []
+            for hold in self.holds.all():
+                data['holds'].append(hold.to_dict())
+
+        if self.degrees is not None:
+            data['degrees'] = []
+            for degree in self.degrees.all():
+                data['degrees'].append(degree.to_dict())
+
+        return data
 
 
 class StudentHold(models.Model):
@@ -404,15 +518,13 @@ class StudentHold(models.Model):
     hold_type_desc = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'student_hold'
+        managed = False
         unique_together = (('student', 'seq'),)
+        ordering = ['seq']
 
-    def save(self, *args, **kwargs):
-        raise NotImplemented()
-
-    def delete(self, *args, **kwargs):
-        raise NotImplemented()
+    def to_dict(self):
+        return model_to_dict(self)
 
 
 class StudentToAdviser(models.Model):
@@ -420,15 +532,9 @@ class StudentToAdviser(models.Model):
     adviser = models.ForeignKey(Adviser, models.DO_NOTHING)
 
     class Meta:
-        managed = False
         db_table = 'student_to_adviser'
+        managed = False
         unique_together = (('student', 'adviser'),)
-
-    def save(self, *args, **kwargs):
-        raise NotImplemented()
-
-    def delete(self, *args, **kwargs):
-        raise NotImplemented()
 
 
 class StudentToSport(models.Model):
@@ -436,15 +542,9 @@ class StudentToSport(models.Model):
     sport = models.ForeignKey(Sport, models.DO_NOTHING)
 
     class Meta:
-        managed = False
         db_table = 'student_to_sport'
+        managed = False
         unique_together = (('student', 'sport'),)
-
-    def save(self, *args, **kwargs):
-        raise NotImplemented()
-
-    def delete(self, *args, **kwargs):
-        raise NotImplemented()
 
 
 class Degree(models.Model):
@@ -460,11 +560,11 @@ class Degree(models.Model):
     degree_level_type_desc = models.TextField(blank=True, null=True)
     degree_desc = models.TextField(blank=True, null=True)
     degree_uw_credits = models.DecimalField(
-        max_digits=5, decimal_places=5, blank=True, null=True)
+        max_digits=6, decimal_places=2, blank=True, null=True)
     degree_transfer_credits = models.DecimalField(
-        max_digits=5, decimal_places=5, blank=True, null=True)
+        max_digits=6, decimal_places=2, blank=True, null=True)
     degree_extension_credits = models.DecimalField(
-        max_digits=5, decimal_places=5, blank=True, null=True)
+        max_digits=6, decimal_places=2, blank=True, null=True)
     degree_gpa = models.TextField(blank=True, null=True)
     fin_org_key = models.TextField(blank=True, null=True)
     primary_fin_org_key = models.TextField(blank=True, null=True)
@@ -480,17 +580,17 @@ class Degree(models.Model):
     degree_grad_honor_desc = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'degree'
+        managed = False
         unique_together = ((
             'student', 'degree_term', 'campus_code', 'degree_abbr_code',
             'degree_pathway_num'),)
 
-    def save(self, *args, **kwargs):
-        raise NotImplemented()
-
-    def delete(self, *args, **kwargs):
-        raise NotImplemented()
+    def to_dict(self):
+        data = model_to_dict(self)
+        if self.degree_term is not None:
+            data['degree_term'] = self.degree_term.to_dict()
+        return data
 
 
 class Transcript(models.Model):
@@ -505,9 +605,9 @@ class Transcript(models.Model):
     resident = models.SmallIntegerField(blank=True, null=True)
     resident_cat = models.TextField(blank=True, null=True)
     qtr_grade_points = models.DecimalField(
-        max_digits=5, decimal_places=5, blank=True, null=True)
+        max_digits=6, decimal_places=2, blank=True, null=True)
     qtr_graded_attmp = models.DecimalField(
-        max_digits=5, decimal_places=5, blank=True, null=True)
+        max_digits=6, decimal_places=2, blank=True, null=True)
     class_code = models.SmallIntegerField(blank=True, null=True)
     honors_program = models.SmallIntegerField(blank=True, null=True)
     special_program = models.SmallIntegerField(blank=True, null=True)
@@ -518,23 +618,23 @@ class Transcript(models.Model):
     num_courses = models.SmallIntegerField(blank=True, null=True)
     enroll_status = models.SmallIntegerField(blank=True, null=True)
     tenth_day_credits = models.DecimalField(
-        max_digits=5, decimal_places=5, blank=True, null=True)
+        max_digits=6, decimal_places=2, blank=True, null=True)
     tr_en_stat_dt = models.DateTimeField(blank=True, null=True)
     last_changed = models.DateTimeField(
         db_column='_last_changed', blank=True, null=True)
     over_qtr_deduct = models.DecimalField(
-        max_digits=5, decimal_places=5, blank=True, null=True)
+        max_digits=6, decimal_places=2, blank=True, null=True)
     over_qtr_grade_at = models.DecimalField(
-        max_digits=5, decimal_places=5, blank=True, null=True)
+        max_digits=6, decimal_places=2, blank=True, null=True)
     over_qtr_grade_pt = models.DecimalField(
-        max_digits=5, decimal_places=5, blank=True, null=True)
+        max_digits=6, decimal_places=2, blank=True, null=True)
     over_qtr_nongrd = models.DecimalField(
-        max_digits=5, decimal_places=5, blank=True, null=True)
+        max_digits=6, decimal_places=2, blank=True, null=True)
     qtr_comment = models.TextField(blank=True, null=True)
     qtr_deductible = models.DecimalField(
-        max_digits=5, decimal_places=5, blank=True, null=True)
+        max_digits=6, decimal_places=2, blank=True, null=True)
     qtr_nongrd_earned = models.DecimalField(
-        max_digits=5, decimal_places=5, blank=True, null=True)
+        max_digits=6, decimal_places=2, blank=True, null=True)
     add_to_cum = models.BooleanField(blank=True, null=True)
     scholarship_abbr = models.TextField(blank=True, null=True)
     scholarship_desc = models.TextField(blank=True, null=True)
@@ -543,14 +643,16 @@ class Transcript(models.Model):
     special_program_desc = models.TextField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'transcript'
+        managed = False
 
-    def save(self, *args, **kwargs):
-        raise NotImplemented()
-
-    def delete(self, *args, **kwargs):
-        raise NotImplemented()
+    def to_dict(self):
+        data = model_to_dict(self)
+        if self.tran_term is not None:
+            data['tran_term'] = self.tran_term.to_dict()
+        if self.leave_ends_term is not None:
+            data['leave_ends_term'] = self.leave_ends_term.to_dict()
+        return data
 
 
 class Transfer(models.Model):
@@ -559,7 +661,7 @@ class Transfer(models.Model):
     year_ending = models.SmallIntegerField(blank=True, null=True)
     year_beginning = models.SmallIntegerField(blank=True, null=True)
     transfer_gpa = models.DecimalField(
-        max_digits=5, decimal_places=5, blank=True, null=True)
+        max_digits=3, decimal_places=2, blank=True, null=True)
     trans_updt_dt = models.DateTimeField(blank=True, null=True)
     trans_updt_id = models.TextField(blank=True, null=True)
     degree_earned = models.TextField(blank=True, null=True)
@@ -582,11 +684,8 @@ class Transfer(models.Model):
     wa_cc = models.BooleanField(blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'transfer'
+        managed = False
 
-    def save(self, *args, **kwargs):
-        raise NotImplemented()
-
-    def delete(self, *args, **kwargs):
-        raise NotImplemented()
+    def to_dict(self):
+        return model_to_dict(self)

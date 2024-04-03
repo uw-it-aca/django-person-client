@@ -6,13 +6,12 @@ USER root
 
 RUN apt-get update && apt-get install libpq-dev -y
 
-ADD --chown=acait:acait docker/start.sh /scripts
-RUN chmod -R +x /scripts
-
 USER acait
 
 ADD --chown=acait:acait . /app/
 ADD --chown=acait:acait docker/ /app/project/
+ADD --chown=acait:acait docker/app_start.sh /scripts
+RUN chmod u+x /scripts/app_start.sh
 
 RUN . /app/bin/activate && pip install .
 

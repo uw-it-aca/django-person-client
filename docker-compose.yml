@@ -6,6 +6,8 @@ services:
       ENV: localdev
       DB: postgres
       PORT: 8000
+      SQL_HOST: db
+      SQL_PORT: 5432
     build:
       context: .
       target: app-container
