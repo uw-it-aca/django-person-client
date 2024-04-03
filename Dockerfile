@@ -13,7 +13,7 @@ ADD --chown=acait:acait docker/ /app/project/
 ADD --chown=acait:acait docker/app_start.sh /scripts
 RUN chmod u+x /scripts/app_start.sh
 
-RUN . /app/bin/activate && pip install .
+RUN /app/bin/pip install .
 
 FROM us-docker.pkg.dev/uwit-mci-axdd/containers/django-test-container:${DJANGO_CONTAINER_VERSION} as app-test-container
 
