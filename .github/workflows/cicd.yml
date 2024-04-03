@@ -23,7 +23,7 @@
 #  4) Update the matrix of django versions to test, if necessary.
 #
 ---
-name: tests
+name: Build, Test and Publish
 
 env:
   DJANGO_APP: uw_person_client
@@ -45,8 +45,6 @@ jobs:
     runs-on: ubuntu-22.04
 
     outputs:
-      commit_hash: ${{ steps.context.outputs.commit_hash }}
-      git_repo_branch: ${{ steps.context.outputs.git_repo_branch }}
       image_tag: ${{ steps.context.outputs.image_tag }}
 
     steps:

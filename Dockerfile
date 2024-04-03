@@ -10,10 +10,11 @@ USER acait
 
 ADD --chown=acait:acait . /app/
 ADD --chown=acait:acait docker/ /app/project/
+
 ADD --chown=acait:acait docker/app_start.sh /scripts
 RUN chmod u+x /scripts/app_start.sh
 
-RUN /app/bin/pip install .
+RUN /app/bin/pip install -r requirements.txt
 
 FROM us-docker.pkg.dev/uwit-mci-axdd/containers/django-test-container:${DJANGO_CONTAINER_VERSION} as app-test-container
 
