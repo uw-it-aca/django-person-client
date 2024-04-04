@@ -1,20 +1,12 @@
 # Copyright 2024 UW-IT, University of Washington
 # SPDX-License-Identifier: Apache-2.0
 
-from django.test import TestCase
-from uw_person_client.models import (
-    Person, Employee, Adviser, Student)
-from uw_person_client.exceptions import (
-    PersonNotFoundException, AdviserNotFoundException)
+from uw_person_client.tests import ModelTest
+from uw_person_client.models import Person
+from uw_person_client.exceptions import PersonNotFoundException
 
 
-class PDSTest(TestCase):
-    fixtures = ['person.json', 'employee.json', 'term.json', 'major.json',
-                'student.json', 'adviser.json', 'transfer.json',
-                'transcript.json', 'hold.json', 'degree.json', 'sport.json']
-
-
-class PersonTest(PDSTest):
+class PersonTest(ModelTest):
     def test_get_person_by_prior_uwnetid(self):
         p = Person.objects.get_person_by_uwnetid('jadviser1')
         self.assertEqual(p.uwnetid, 'jadviser')
@@ -158,20 +150,3 @@ class PersonTest(PDSTest):
 
         p2 = Person(**data1)
         self.assertEqual(data1, p2.to_dict())
-
-
-class AdviserTest(PDSTest):
-    def test_get_adviser_by_uwnetid(self):
-        self.assertRaises(AdviserNotFoundException,
-                          Adviser.objects.get_adviser_by_uwnetid,
-                          'nobody')
-        self.assertRaises(AdviserNotFoundException,
-                          Adviser.objects.get_adviser_by_uwnetid,
-                          'javerage')
-
-        a = Adviser.objects.get_adviser_by_uwnetid('jadviser')
-        self.assertEqual(a.advising_email, 'jadviser@uw.edu')
-
-    def test_get_adviser_by_prior_uwnetid(self):
-        a = Adviser.objects.get_adviser_by_uwnetid('jadviser1')
-        self.assertEqual(a.advising_email, 'jadviser@uw.edu')

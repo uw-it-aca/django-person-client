@@ -180,7 +180,9 @@ class Employee(models.Model):
         managed = False
 
     def to_dict(self):
-        return model_to_dict(self)
+        data = model_to_dict(self)
+        data['person'] = self.person.to_dict()
+        return data
 
 
 class AdviserManager(models.Manager):
@@ -212,7 +214,9 @@ class Adviser(models.Model):
         managed = False
 
     def to_dict(self):
-        return model_to_dict(self)
+        data = model_to_dict(self)
+        data['employee'] = self.employee.to_dict()
+        return data
 
 
 class Term(models.Model):
