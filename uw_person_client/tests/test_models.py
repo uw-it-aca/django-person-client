@@ -15,6 +15,10 @@ class PDSTest(TestCase):
 
 
 class PersonTest(PDSTest):
+    def test_get_person_by_prior_uwnetid(self):
+        p = Person.objects.get_person_by_uwnetid('jadviser1')
+        self.assertEqual(p.uwnetid, 'jadviser')
+
     def test_get_person_by_uwnetid(self):
         self.assertRaises(PersonNotFoundException,
                           Person.objects.get_person_by_uwnetid, 'nobody')
@@ -33,6 +37,7 @@ class PersonTest(PDSTest):
         self.assertEqual(p.employee.employee_affiliation_state, 'current')
         self.assertEqual(p.student, None)
 
+    def test_get_basic_student_by_uwnetid(self):
         p = Person.objects.get_person_by_uwnetid(
             'jbothell', include_student=True)
         self.assertEqual(p.uwnetid, 'jbothell')
@@ -51,7 +56,7 @@ class PersonTest(PDSTest):
         self.assertEqual(p.student.holds, None)
         self.assertEqual(p.student.degrees, None)
 
-        # Optional includes
+    def test_get_student_includes_by_uwnetid(self):
         p = Person.objects.get_person_by_uwnetid(
             'javerage', include_student=True, include_student_transcripts=True)
         self.assertEqual(p.uwnetid, 'javerage')
@@ -74,6 +79,12 @@ class PersonTest(PDSTest):
         self.assertEqual(len(p.student.degrees.all()), 1)
         self.assertEqual(p.student.degrees.all()[0].degree_abbr_code, 'STAT')
 
+    def test_get_person_by_prior_uwregid(self):
+        p = Person.objects.get_person_by_uwregid(
+            '9136CCB8F66711D5BE060004AC494FF0')
+        self.assertEqual(p.uwnetid, 'javerage')
+        self.assertEqual(p.uwregid, '9136CCB8F66711D5BE060004AC494FFE')
+
     def test_get_person_by_uwregid(self):
         self.assertRaises(PersonNotFoundException,
                           Person.objects.get_person_by_uwregid,
@@ -87,6 +98,7 @@ class PersonTest(PDSTest):
         self.assertEqual(p.employee, None)
         self.assertEqual(p.student, None)
 
+    def test_get_full_student_by_uwregid(self):
         p = Person.objects.get_person_by_uwregid(
             '9136CCB8F66711D5BE060004AC494FFE',
             include_student=True,
@@ -94,3 +106,55 @@ class PersonTest(PDSTest):
             include_student_transfers=True,
             include_student_holds=True,
             include_student_degrees=True)
+        self.assertEqual(len(p.student.transcripts.all()), 2)
+        self.assertEqual(len(p.student.transfers.all()), 1)
+        self.assertEqual(len(p.student.holds.all()), 2)
+        self.assertEqual(len(p.student.degrees.all()), 1)
+
+    def test_get_person_by_system_key(self):
+        self.assertRaises(PersonNotFoundException,
+                          Person.objects.get_person_by_system_key,
+                          '010101010')
+
+        p = Person.objects.get_person_by_system_key('532353230')
+        self.assertEqual(p.uwnetid, 'javerage')
+        self.assertEqual(p.uwregid, '9136CCB8F66711D5BE060004AC494FFE')
+        self.assertEqual(p.system_key, '532353230')
+        self.assertEqual(p.employee, None)
+        self.assertEqual(p.student, None)
+
+    def test_get_student_by_system_key(self):
+        p = Person.objects.get_person_by_system_key(
+            '532353230',
+            include_student=True,
+            include_student_transcripts=True)
+        self.assertEqual(p.student.major_1.major_name, 'PRE SOCIAL SCIENCE')
+        self.assertEqual(len(p.student.transcripts.all()), 2)
+
+    def test_get_person_by_student_number(self):
+        self.assertRaises(PersonNotFoundException,
+                          Person.objects.get_person_by_student_number,
+                          '1000000')
+
+        p = Person.objects.get_person_by_student_number('1033334')
+        self.assertEqual(p.uwnetid, 'javerage')
+        self.assertEqual(p.uwregid, '9136CCB8F66711D5BE060004AC494FFE')
+        self.assertEqual(p.uwnetid, 'javerage')
+        self.assertEqual(p.employee, None)
+        self.assertEqual(p.student, None)
+
+    def test_get_student_includes_by_student_number(self):
+        p = Person.objects.get_person_by_student_number(
+            '1033334',
+            include_student=True,
+            include_student_transcripts=True)
+        self.assertEqual(p.student.student_number, '1033334')
+        self.assertEqual(p.student.major_1.major_name, 'PRE SOCIAL SCIENCE')
+        self.assertEqual(len(p.student.transcripts.all()), 2)
+
+    def test_person_to_dict(self):
+        p1 = Person.objects.get_person_by_uwnetid('javerage')
+        data1 = p1.to_dict()
+
+        p2 = Person(**data1)
+        self.assertEqual(data1, p2.to_dict())

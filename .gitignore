@@ -1,3 +1,5 @@
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -54,6 +56,8 @@ coverage.xml
 # Django stuff:
 *.log
 local_settings.py
+local.py
+production.py
 db.sqlite3
 
 # Flask stuff:
@@ -97,8 +101,29 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
+# IDE settings
+.editorconfig
+
 # mkdocs documentation
 /site
 
 # mypy
 .mypy_cache/
+
+# private connection settings
+constring.txt
+
+# node
+node_modules/
+package-lock.json
+
+# vite bundle
+assets/
+manifest.json
+
+# cypress image snapshots diffs
+screenshots/
+__diff_output__/
+
+# coverage
+coverage
