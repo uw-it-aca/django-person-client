@@ -1,4 +1,8 @@
 [run]
-branch = True
-source = uw_person_client
-include = uw_person_client/*
+source = django-person-client
+parallel = True
+
+[paths]
+source =
+  uw_person_client/
+  /app/uw_person_client/
