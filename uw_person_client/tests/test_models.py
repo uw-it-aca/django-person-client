@@ -158,3 +158,20 @@ class PersonTest(PDSTest):
 
         p2 = Person(**data1)
         self.assertEqual(data1, p2.to_dict())
+
+
+class AdviserTest(PDSTest):
+    def test_get_adviser_by_uwnetid(self):
+        self.assertRaises(AdviserNotFoundException,
+                          Adviser.objects.get_adviser_by_uwnetid,
+                          'nobody')
+        self.assertRaises(AdviserNotFoundException,
+                          Adviser.objects.get_adviser_by_uwnetid,
+                          'javerage')
+
+        a = Adviser.objects.get_adviser_by_uwnetid('jadviser')
+        self.assertEqual(a.advising_email, 'jadviser@uw.edu')
+
+    def test_get_adviser_by_prior_uwnetid(self):
+        a = Adviser.objects.get_adviser_by_uwnetid('jadviser1')
+        self.assertEqual(a.advising_email, 'jadviser@uw.edu')
