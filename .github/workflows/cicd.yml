@@ -120,7 +120,7 @@ jobs:
         id: tests
         shell: bash
         run: >-
-          docker run -u root -t
+          docker run -u root -t --network ${{ job.container.network }}
           -v ${PWD}:/coverage
           -e DJANGO_APP="$DJANGO_APP"
           -e "ENV=localdev"
