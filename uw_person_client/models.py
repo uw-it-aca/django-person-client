@@ -183,6 +183,17 @@ class Employee(models.Model):
         return model_to_dict(self)
 
 
+class AdviserManager(models.Manager):
+    def get_adviser_by_uwnetid(self, uwnetid):
+        queryset = super().get_queryset().filter(
+            Q(employee__person__uwnetid=uwnetid) | Q(
+                employee__person__prior_uwnetids__contains=[uwnetid]))
+        try:
+            return queryset.get()
+        except Adviser.DoesNotExist:
+            raise AdviserNotFoundException(uwnetid)
+
+
 class Adviser(models.Model):
     employee = models.ForeignKey(Employee, models.DO_NOTHING)
     is_dept_adviser = models.BooleanField(blank=True, null=True)
@@ -193,6 +204,8 @@ class Adviser(models.Model):
     booking_url = models.TextField(blank=True, null=True)
     last_changed = models.DateTimeField(
         db_column='_last_changed', blank=True, null=True)
+
+    objects = AdviserManager()
 
     class Meta:
         db_table = 'adviser'
