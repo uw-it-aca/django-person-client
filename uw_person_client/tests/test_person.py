@@ -150,3 +150,19 @@ class PersonTest(ModelTest):
 
         p2 = Person(**data1)
         self.assertEqual(data1, p2.to_dict())
+
+    def test_get_active_employees(self):
+        results = Person.objects.get_active_employees()
+        self.assertEqual(len(results), 2)
+
+        results = Person.objects.get_active_employees(include_employee=True)
+        self.assertEqual(len(results), 2)
+        self.assertEqual(results[1].employee.employee_number, '200000000')
+
+    def test_get_active_students(self):
+        results = Person.objects.get_active_students()
+        self.assertEqual(len(results), 2)
+
+        results = Person.objects.get_active_students(include_student=True)
+        self.assertEqual(len(results), 2)
+        self.assertEqual(results[1].student.student_number, '1233334')
