@@ -94,13 +94,28 @@ class PersonManager(models.Manager):
             raise PersonNotFoundException(student_number)
 
     def get_active_students(self, **kwargs):
-        pass
+        queryset = super().get_queryset().filter(is_active_student=True)
+
+        related_fields = self._include(**kwargs)
+        if len(related_fields):
+            queryset.prefetch_related(*related_fields)
+
+        persons = []
+        for person in queryset:
+            persons.append(self._assemble(person, **kwargs))
+        return persons
 
     def get_active_employees(self, **kwargs):
-        pass
+        queryset = super().get_queryset().filter(is_active_employee=True)
 
-    def get_advisers(self, advising_program=None, **kwargs):
-        pass
+        related_fields = self._include(**kwargs)
+        if len(related_fields):
+            queryset.prefetch_related(*related_fields)
+
+        persons = []
+        for person in queryset:
+            persons.append(self._assemble(person, **kwargs))
+        return persons
 
 
 class Person(models.Model):
