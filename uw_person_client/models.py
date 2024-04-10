@@ -679,6 +679,7 @@ class Transcript(models.Model):
     class Meta:
         db_table = 'transcript'
         managed = False
+        ordering = ['-tran_term__year', '-tran_term__quarter']
 
     def to_dict(self):
         data = model_to_dict(self)

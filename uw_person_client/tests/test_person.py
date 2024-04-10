@@ -54,6 +54,12 @@ class PersonTest(ModelTest):
         self.assertEqual(p.uwnetid, 'javerage')
         self.assertEqual(len(p.student.transcripts.all()), 2)
 
+        # default transcript sorting
+        t1 = p.student.transcripts.all()[0]
+        t2 = p.student.transcripts.all()[1]
+        self.assertLess(int(f'{t2.tran_term.year}{t2.tran_term.quarter}'),
+                        int(f'{t1.tran_term.year}{t1.tran_term.quarter}'))
+
         p = Person.objects.get_person_by_uwnetid(
             'javerage', include_student=True, include_student_transfers=True)
         self.assertEqual(p.uwnetid, 'javerage')
