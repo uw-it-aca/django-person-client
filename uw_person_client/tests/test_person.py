@@ -40,6 +40,8 @@ class PersonTest(ModelTest):
         self.assertEqual(p.student.major_1.major_name, 'INTERNATIONAL STUDIES')
         self.assertEqual(p.student.major_2, None)
         self.assertEqual(p.student.major_3, None)
+        self.assertEqual(len(p.student.majors), 1)
+        self.assertEqual(len(p.student.pending_majors), 1)
         self.assertEqual(len(p.student.sports.all()), 1)
         self.assertEqual(p.student.sports.all()[0].short_sport_name, 'GLF')
         self.assertEqual(len(p.student.advisers.all()), 1)
@@ -148,6 +150,8 @@ class PersonTest(ModelTest):
             include_student_transcripts=True)
         self.assertEqual(p.student.student_number, '1033334')
         self.assertEqual(p.student.major_1.major_name, 'PRE SOCIAL SCIENCE')
+        self.assertEqual(len(p.student.majors), 2)
+        self.assertEqual(len(p.student.pending_majors), 0)
         self.assertEqual(len(p.student.transcripts.all()), 2)
 
     def test_person_to_dict(self):

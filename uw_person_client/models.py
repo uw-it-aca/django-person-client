@@ -461,6 +461,28 @@ class Student(models.Model):
         managed = False
 
     @property
+    def majors(self):
+        majors = []
+        if self.major_1:
+            majors.append(self.major_1)
+        if self.major_2:
+            majors.append(self.major_2)
+        if self.major_3:
+            majors.append(self.major_3)
+        return majors
+
+    @property
+    def pending_majors(self):
+        pending_majors = []
+        if self.pending_major_1:
+            pending_majors.append(self.pending_major_1)
+        if self.pending_major_2:
+            pending_majors.append(self.pending_major_2)
+        if self.pending_major_3:
+            pending_majors.append(self.pending_major_3)
+        return pending_majors
+
+    @property
     def transcripts(self):
         try:
             return self._transcripts
