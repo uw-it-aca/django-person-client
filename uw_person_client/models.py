@@ -462,25 +462,39 @@ class Student(models.Model):
 
     @property
     def majors(self):
-        majors = []
-        if self.major_1:
-            majors.append(self.major_1)
-        if self.major_2:
-            majors.append(self.major_2)
-        if self.major_3:
-            majors.append(self.major_3)
-        return majors
+        try:
+            return self._majors
+        except AttributeError:
+            self._majors = []
+            if self.major_1:
+                self._majors.append(self.major_1)
+            if self.major_2:
+                self._majors.append(self.major_2)
+            if self.major_3:
+                self._majors.append(self.major_3)
+            return self._majors
+
+    @majors.setter
+    def majors(self, value):
+        self._majors = value
 
     @property
     def pending_majors(self):
-        pending_majors = []
-        if self.pending_major_1:
-            pending_majors.append(self.pending_major_1)
-        if self.pending_major_2:
-            pending_majors.append(self.pending_major_2)
-        if self.pending_major_3:
-            pending_majors.append(self.pending_major_3)
-        return pending_majors
+        try:
+            return self._pending_majors
+        except AttributeError:
+            self._pending_majors = []
+            if self.pending_major_1:
+                self._pending_majors.append(self.pending_major_1)
+            if self.pending_major_2:
+                self._pending_majors.append(self.pending_major_2)
+            if self.pending_major_3:
+                self._pending_majors.append(self.pending_major_3)
+            return self._pending_majors
+
+    @pending_majors.setter
+    def pending_majors(self, value):
+        self._pending_majors = value
 
     @property
     def transcripts(self):
