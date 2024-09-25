@@ -507,6 +507,42 @@ class Student(models.Model):
         self._pending_majors = value
 
     @property
+    def requested_majors(self):
+        try:
+            return self._requested_majors
+        except AttributeError:
+            self._requested_majors = []
+            if self.requested_major1_code:
+                self._requested_majors.append(self.requested_major1_code)
+            if self.requested_major2_code:
+                self._requested_majors.append(self.requested_major2_code)
+            if self.requested_major3_code:
+                self._requested_majors.append(self.requested_major3_code)
+            return self._requested_majors
+
+    @requested_majors.setter
+    def requested_majors(self, value):
+        self._requested_majors = value
+
+    @property
+    def intended_majors(self):
+        try:
+            return self._intended_majors
+        except AttributeError:
+            self._intended_majors = []
+            if self.intended_major1_code:
+                self._intended_majors.append(self.intended_major1_code)
+            if self.intended_major2_code:
+                self._intended_majors.append(self.intended_major2_code)
+            if self.intended_major3_code:
+                self._intended_majors.append(self.intended_major3_code)
+            return self._intended_majors
+
+    @intended_majors.setter
+    def intended_majors(self, value):
+        self._intended_majors = value
+
+    @property
     def transcripts(self):
         try:
             return self._transcripts
@@ -553,36 +589,28 @@ class Student(models.Model):
     def to_dict(self):
         data = model_to_dict(self)
         data['academic_term'] = self.academic_term.to_dict()
+        data['majors'] = [m.to_dict() for m in self.majors]
+        data['pending_majors'] = [m.to_dict() for m in self.pending_majors]
+        data['requested_majors'] = self.requested_majors
+        data['intended_majors'] = self.intended_majors
 
-        advisers = []
-        for adviser in self.advisers.all():
-            advisers.append(adviser.to_dict())
-        data['advisers'] = advisers
+        if self.advisers is not None:
+            data['advisers'] = [a.to_dict() for a in self.advisers.all()]
 
-        sports = []
-        for sport in self.sports.all():
-            sports.append(sport.to_dict())
-        data['sports'] = sports
+        if self.sports is not None:
+            data['sports'] = [s.to_dict() for s in self.sports.all()]
 
         if self.transcripts is not None:
-            data['transcripts'] = []
-            for transcript in self.transcripts.all():
-                data['transcripts'].append(transcript.to_dict())
+            data['transcripts'] = [t.to_dict() for t in self.transcripts.all()]
 
         if self.transfers is not None:
-            data['transfers'] = []
-            for transfer in self.transfers.all():
-                data['transfers'].append(transfer.to_dict())
+            data['transfers'] = [t.to_dict() for t in self.transfers.all()]
 
         if self.holds is not None:
-            data['holds'] = []
-            for hold in self.holds.all():
-                data['holds'].append(hold.to_dict())
+            data['holds'] = [h.to_dict() for h in self.holds.all()]
 
         if self.degrees is not None:
-            data['degrees'] = []
-            for degree in self.degrees.all():
-                data['degrees'].append(degree.to_dict())
+            data['degrees'] = [d.to_dict() for d in self.degrees.all()]
 
         return data
 
