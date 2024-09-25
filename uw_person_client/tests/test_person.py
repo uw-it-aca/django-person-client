@@ -147,12 +147,27 @@ class PersonTest(ModelTest):
         p = Person.objects.get_person_by_student_number(
             '1033334',
             include_student=True,
-            include_student_transcripts=True)
+            include_student_transcripts=True,
+            include_student_transfers=True,
+            include_student_holds=True,
+            include_student_degrees=True)
+
         self.assertEqual(p.student.student_number, '1033334')
         self.assertEqual(p.student.major_1.major_name, 'PRE SOCIAL SCIENCE')
         self.assertEqual(len(p.student.majors), 2)
         self.assertEqual(len(p.student.pending_majors), 0)
         self.assertEqual(len(p.student.transcripts.all()), 2)
+
+        data = p.to_dict().get('student')
+
+        self.assertEqual(len(data['majors']), 2)
+        self.assertEqual(len(data['pending_majors']), 0)
+        self.assertEqual(len(data['requested_majors']), 2)
+        self.assertEqual(len(data['intended_majors']), 2)
+        self.assertEqual(len(data['transcripts']), 2)
+        self.assertEqual(len(data['transfers']), 1)
+        self.assertEqual(len(data['holds']), 2)
+        self.assertEqual(len(data['degrees']), 1)
 
     def test_person_to_dict(self):
         p1 = Person.objects.get_person_by_uwnetid('javerage')
