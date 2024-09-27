@@ -465,6 +465,8 @@ class Student(models.Model):
     deceased_date = models.DateField(blank=True, null=True)
     ethnic_group_desc = models.TextField(blank=True, null=True)
     hispanic_group_desc = models.TextField(blank=True, null=True)
+    ethnic_under_rep = models.BooleanField(blank=True, null=True)
+    hispanic_under_rep = models.BooleanField(blank=True, null=True)
 
     class Meta:
         db_table = 'student'
