@@ -255,6 +255,8 @@ class Migration(migrations.Migration):
                 ('deceased_date', models.DateField(blank=True, null=True)),
                 ('ethnic_group_desc', models.TextField(blank=True, null=True)),
                 ('hispanic_group_desc', models.TextField(blank=True, null=True)),
+                ('ethnic_under_rep', models.BooleanField(blank=True, null=True)),
+                ('hispanic_under_rep', models.BooleanField(blank=True, null=True)),
             ],
             options={
                 'db_table': 'student',
