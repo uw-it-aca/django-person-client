@@ -9,6 +9,22 @@ from uw_person_client.exceptions import (
     PersonNotFoundException, AdviserNotFoundException)
 
 
+class PersonQueue(models.Model):
+    uwnetid = models.TextField(unique=True)
+
+    class Meta:
+        db_table = 'person_queue'
+        managed = False
+
+
+class EnrolledStudentQueue(models.Model):
+    system_key = models.TextField(unique=True)
+
+    class Meta:
+        db_table = 'enrolled_student_queue'
+        managed = False
+
+
 class PersonManager(models.Manager):
     def _include(self, **kwargs):
         related_fields = []
