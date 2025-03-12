@@ -1,4 +1,4 @@
-# Copyright 2024 UW-IT, University of Washington
+# Copyright 2025 UW-IT, University of Washington
 # SPDX-License-Identifier: Apache-2.0
 
 from django.db import models
@@ -7,6 +7,46 @@ from django.contrib.postgres.fields import ArrayField
 from django.forms import model_to_dict
 from uw_person_client.exceptions import (
     PersonNotFoundException, AdviserNotFoundException)
+from uw_pws import PWS, InvalidNetID, InvalidStudentSystemKey
+
+
+class PersonQueueManager(models.Manager):
+    def add_to_queue(self, uwnetid):
+        if PWS().valid_uwnetid(uwnetid):
+            pq, _ = PersonQueue.objects.get_or_create(uwnetid=uwnetid)
+            return True
+        else:
+            raise InvalidNetID(uwnetid)
+
+
+class PersonQueue(models.Model):
+    uwnetid = models.TextField(unique=True)
+
+    class Meta:
+        db_table = 'person_queue'
+        managed = False
+
+    objects = PersonQueueManager()
+
+
+class EnrolledStudentQueueManager(models.Manager):
+    def add_to_queue(self, system_key):
+        if PWS().valid_student_system_key(system_key):
+            esq, _ = EnrolledStudentQueue.objects.get_or_create(
+                system_key=system_key)
+            return True
+        else:
+            raise InvalidStudentSystemKey(system_key)
+
+
+class EnrolledStudentQueue(models.Model):
+    system_key = models.TextField(unique=True)
+
+    class Meta:
+        db_table = 'enrolled_student_queue'
+        managed = False
+
+    objects = EnrolledStudentQueueManager()
 
 
 class PersonManager(models.Manager):
