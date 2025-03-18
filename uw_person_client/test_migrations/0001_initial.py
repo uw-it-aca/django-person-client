@@ -322,6 +322,7 @@ class Migration(migrations.Migration):
                 ('resident_cat', models.TextField(blank=True, null=True)),
                 ('qtr_grade_points', models.DecimalField(blank=True, decimal_places=2, max_digits=6, null=True)),
                 ('qtr_graded_attmp', models.DecimalField(blank=True, decimal_places=2, max_digits=6, null=True)),
+                ('qtr_nongrd_attmp', models.DecimalField(blank=True, decimal_places=2, max_digits=6, null=True)),
                 ('class_code', models.SmallIntegerField(blank=True, null=True)),
                 ('honors_program', models.SmallIntegerField(blank=True, null=True)),
                 ('special_program', models.SmallIntegerField(blank=True, null=True)),

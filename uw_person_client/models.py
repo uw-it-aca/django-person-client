@@ -758,6 +758,8 @@ class Transcript(models.Model):
         max_digits=6, decimal_places=2, blank=True, null=True)
     qtr_graded_attmp = models.DecimalField(
         max_digits=6, decimal_places=2, blank=True, null=True)
+    qtr_nongrd_attmp = models.DecimalField(
+        max_digits=6, decimal_places=2, blank=True, null=True)
     class_code = models.SmallIntegerField(blank=True, null=True)
     honors_program = models.SmallIntegerField(blank=True, null=True)
     special_program = models.SmallIntegerField(blank=True, null=True)
@@ -803,7 +805,41 @@ class Transcript(models.Model):
             data['tran_term'] = self.tran_term.to_dict()
         if self.leave_ends_term is not None:
             data['leave_ends_term'] = self.leave_ends_term.to_dict()
+        data['deductible_credits'] = self.deductible_credits
+        data['grade_points'] = self.grade_points
+        data['graded_attempted'] = self.graded_attempted
+        data['nongraded_earned'] = self.nongraded_earned
+        data['total_attempted'] = self.total_attempted
+        data['total_earned'] = self.total_earned
         return data
+
+    @property
+    def deductible_credits(self):
+        return self.over_qtr_deduct if (
+            self.over_qtr_deduct > 0) else self.qtr_deductible
+
+    @property
+    def grade_points(self):
+        return self.over_qtr_grade_pt if (
+            self.over_qtr_grade_pt > 0) else self.qtr_grade_points
+
+    @property
+    def graded_attempted(self):
+        return self.over_qtr_grade_at if (
+            self.over_qtr_grade_at > 0) else self.qtr_graded_attmp
+
+    @property
+    def nongraded_earned(self):
+        return self.over_qtr_nongrd if (
+            self.over_qtr_nongrd > 0) else self.qtr_nongrd_earned
+
+    @property
+    def total_attempted(self):
+        return self.graded_attempted + self.qtr_nongrd_attmp
+
+    @property
+    def total_earned(self):
+        return self.graded_attempted + self.nongraded_earned
 
 
 class Transfer(models.Model):
