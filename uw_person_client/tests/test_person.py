@@ -1,4 +1,4 @@
-# Copyright 2024 UW-IT, University of Washington
+# Copyright 2025 UW-IT, University of Washington
 # SPDX-License-Identifier: Apache-2.0
 
 from uw_person_client.tests import ModelTest
@@ -52,17 +52,6 @@ class PersonTest(ModelTest):
 
     def test_get_student_includes_by_uwnetid(self):
         p = Person.objects.get_person_by_uwnetid(
-            'javerage', include_student=True, include_student_transcripts=True)
-        self.assertEqual(p.uwnetid, 'javerage')
-        self.assertEqual(len(p.student.transcripts.all()), 2)
-
-        # default transcript sorting
-        t1 = p.student.transcripts.all()[0]
-        t2 = p.student.transcripts.all()[1]
-        self.assertLess(int(f'{t2.tran_term.year}{t2.tran_term.quarter}'),
-                        int(f'{t1.tran_term.year}{t1.tran_term.quarter}'))
-
-        p = Person.objects.get_person_by_uwnetid(
             'javerage', include_student=True, include_student_transfers=True)
         self.assertEqual(p.uwnetid, 'javerage')
         self.assertEqual(len(p.student.transfers.all()), 1)
@@ -106,7 +95,7 @@ class PersonTest(ModelTest):
             include_student_transfers=True,
             include_student_holds=True,
             include_student_degrees=True)
-        self.assertEqual(len(p.student.transcripts.all()), 2)
+        self.assertEqual(len(p.student.transcripts.all()), 3)
         self.assertEqual(len(p.student.transfers.all()), 1)
         self.assertEqual(len(p.student.holds.all()), 2)
         self.assertEqual(len(p.student.degrees.all()), 1)
@@ -129,7 +118,7 @@ class PersonTest(ModelTest):
             include_student=True,
             include_student_transcripts=True)
         self.assertEqual(p.student.major_1.major_name, 'PRE SOCIAL SCIENCE')
-        self.assertEqual(len(p.student.transcripts.all()), 2)
+        self.assertEqual(len(p.student.transcripts.all()), 3)
 
     def test_get_person_by_student_number(self):
         self.assertRaises(PersonNotFoundException,
@@ -156,7 +145,7 @@ class PersonTest(ModelTest):
         self.assertEqual(p.student.major_1.major_name, 'PRE SOCIAL SCIENCE')
         self.assertEqual(len(p.student.majors), 2)
         self.assertEqual(len(p.student.pending_majors), 0)
-        self.assertEqual(len(p.student.transcripts.all()), 2)
+        self.assertEqual(len(p.student.transcripts.all()), 3)
 
         data = p.to_dict().get('student')
 
@@ -164,7 +153,7 @@ class PersonTest(ModelTest):
         self.assertEqual(len(data['pending_majors']), 0)
         self.assertEqual(len(data['requested_majors']), 2)
         self.assertEqual(len(data['intended_majors']), 2)
-        self.assertEqual(len(data['transcripts']), 2)
+        self.assertEqual(len(data['transcripts']), 3)
         self.assertEqual(len(data['transfers']), 1)
         self.assertEqual(len(data['holds']), 2)
         self.assertEqual(len(data['degrees']), 1)

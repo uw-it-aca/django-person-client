@@ -27,6 +27,8 @@ name: Build, Test and Publish
 
 env:
   DJANGO_APP: uw_person_client
+  COVERAGE_PYTHON_VERSION: '3.10'
+  COVERAGE_DJANGO_VERSION: '4.2'
 
 on:
   push:
@@ -40,7 +42,7 @@ on:
 
 jobs:
   context:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     outputs:
       image_tag: ${{ steps.context.outputs.image_tag }}
@@ -53,13 +55,23 @@ jobs:
           release_name: ${{ env.DJANGO_APP }}
 
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - '3.10'
+          - '3.12'
+        django-version:
+          - '4.2'
+          - '5.2'
 
     needs: context
 
     services:
       postgres:
-        image: postgres:14
+        image: postgres:17
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
@@ -76,10 +88,10 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: ${{ matrix.python-version }}
 
       - name: Run Python Linters
         uses: uw-it-aca/actions/python-linters@main
@@ -128,6 +140,9 @@ jobs:
           bash -c ". ./docker/test.sh"
 
       - name: Record Test Results
+        if: |
+          matrix.django-version == env.COVERAGE_DJANGO_VERSION &&
+          matrix.python-version == env.COVERAGE_PYTHON_VERSION
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
@@ -141,7 +156,7 @@ jobs:
 
     needs: build
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout Repo

@@ -25,8 +25,9 @@ setup(
     author_email="aca-it@uw.edu",
     include_package_data=True,
     install_requires=[
-        'Django>=4.2,<5',
+        'django>=4.2,<6',
         'psycopg2',
+        'uw-restclients-pws',
     ],
     license='Apache License, Version 2.0',
     description=('A UW Person Client Django app'),
