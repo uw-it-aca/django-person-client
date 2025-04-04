@@ -25,7 +25,7 @@ setup(
     author_email="aca-it@uw.edu",
     include_package_data=True,
     install_requires=[
-        'django>=4.2,<5',
+        'django>=4.2,<6',
         'psycopg2',
         'uw-restclients-pws',
     ],
