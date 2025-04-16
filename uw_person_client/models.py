@@ -8,6 +8,7 @@ from django.forms import model_to_dict
 from uw_person_client.exceptions import (
     PersonNotFoundException, AdviserNotFoundException)
 from uw_pws import PWS, InvalidNetID, InvalidStudentSystemKey
+from decimal import Decimal
 
 
 class PersonQueueManager(models.Manager):
@@ -815,31 +816,37 @@ class Transcript(models.Model):
 
     @property
     def deductible_credits(self):
-        return self.over_qtr_deduct if (
-            self.over_qtr_deduct > 0) else self.qtr_deductible
+        return self.over_qtr_deduct if self.over_qtr_deduct else (
+            self.qtr_deductible if (
+                self.qtr_deductible is not None) else Decimal('0.0'))
 
     @property
     def grade_points(self):
-        return self.over_qtr_grade_pt if (
-            self.over_qtr_grade_pt > 0) else self.qtr_grade_points
+        return self.over_qtr_grade_pt if self.over_qtr_grade_pt else (
+            self.qtr_grade_points if (
+                self.qtr_grade_points is not None) else Decimal('0.0'))
 
     @property
     def graded_attempted(self):
-        return self.over_qtr_grade_at if (
-            self.over_qtr_grade_at > 0) else self.qtr_graded_attmp
+        return self.over_qtr_grade_at if self.over_qtr_grade_at else (
+            self.qtr_graded_attmp if (
+                self.qtr_graded_attmp is not None) else Decimal('0.0'))
 
     @property
     def nongraded_earned(self):
-        return self.over_qtr_nongrd if (
-            self.over_qtr_nongrd > 0) else self.qtr_nongrd_earned
+        return self.over_qtr_nongrd if self.over_qtr_nongrd else (
+            self.qtr_nongrd_earned if (
+                self.qtr_nongrd_earned is not None) else Decimal('0.0'))
 
     @property
     def total_attempted(self):
-        return self.graded_attempted + self.qtr_nongrd_attmp
+        return self.graded_attempted + (self.qtr_nongrd_attmp if (
+            self.qtr_nongrd_attmp is not None) else Decimal('0.0'))
 
     @property
     def total_earned(self):
-        return self.graded_attempted + self.nongraded_earned
+        return (self.graded_attempted - self.deductible_credits +
+                self.nongraded_earned)
 
 
 class Transfer(models.Model):
