@@ -32,6 +32,16 @@ class TranscriptTest(ModelTest):
         self.assertEqual(float(t3.total_earned), 5.0)
         self.assertEqual(float(t3.gpa), 3.90)
 
+        # t3, to_dict
+        d3 = t3.to_dict()
+        self.assertEqual(d3['deductible_credits'], '0.0')
+        self.assertEqual(d3['grade_points'], '19.50')
+        self.assertEqual(d3['graded_attempted'], '5.0')
+        self.assertEqual(d3['nongraded_earned'], '0.0')
+        self.assertEqual(d3['total_attempted'], '5.0')
+        self.assertEqual(d3['total_earned'], '5.0')
+        self.assertEqual(d3['gpa'], '3.90')
+
         # t2, computed attributes
         self.assertEqual(t2.pk, 3)
         self.assertEqual(float(t2.deductible_credits), 1.0)
@@ -41,3 +51,13 @@ class TranscriptTest(ModelTest):
         self.assertEqual(float(t2.total_attempted), 14.2)
         self.assertEqual(float(t2.total_earned), 14.2)
         self.assertEqual(float(t2.gpa), 1.34)
+
+        # t2, to_dict
+        d2 = t2.to_dict()
+        self.assertEqual(d2['deductible_credits'], '1.0')
+        self.assertEqual(d2['grade_points'], '19.00')
+        self.assertEqual(d2['graded_attempted'], '13.2')
+        self.assertEqual(d2['nongraded_earned'], '2.0')
+        self.assertEqual(d2['total_attempted'], '14.2')
+        self.assertEqual(d2['total_earned'], '14.2')
+        self.assertEqual(d2['gpa'], '1.34')

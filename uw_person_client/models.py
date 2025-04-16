@@ -806,13 +806,13 @@ class Transcript(models.Model):
             data['tran_term'] = self.tran_term.to_dict()
         if self.leave_ends_term is not None:
             data['leave_ends_term'] = self.leave_ends_term.to_dict()
-        data['deductible_credits'] = self.deductible_credits
-        data['grade_points'] = self.grade_points
-        data['graded_attempted'] = self.graded_attempted
-        data['nongraded_earned'] = self.nongraded_earned
-        data['total_attempted'] = self.total_attempted
-        data['total_earned'] = self.total_earned
-        data['gpa'] = self.gpa
+        data['deductible_credits'] = str(self.deductible_credits)
+        data['grade_points'] = str(self.grade_points)
+        data['graded_attempted'] = str(self.graded_attempted)
+        data['nongraded_earned'] = str(self.nongraded_earned)
+        data['total_attempted'] = str(self.total_attempted)
+        data['total_earned'] = str(self.total_earned)
+        data['gpa'] = str(self.gpa)
         return data
 
     @property
