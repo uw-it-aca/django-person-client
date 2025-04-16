@@ -22,18 +22,22 @@ class TranscriptTest(ModelTest):
         self.assertLess(int(f'{t3.tran_term.year}{t3.tran_term.quarter}'),
                         int(f'{t2.tran_term.year}{t2.tran_term.quarter}'))
 
-        # computed attributes
-        self.assertEqual(t2.deductible_credits, 1.0)
-        self.assertEqual(t2.grade_points, 19.0)
-        self.assertEqual(t2.graded_attempted, 4.0)
-        self.assertEqual(t2.nongraded_earned, 2.0)
-        self.assertEqual(t2.total_attempted, 5.0)
-        self.assertEqual(t2.total_earned, 6.0)
+        # t3, computed attributes
+        self.assertEqual(t3.pk, 1)
+        self.assertEqual(float(t3.deductible_credits), 0.0)
+        self.assertEqual(float(t3.grade_points), 19.5)
+        self.assertEqual(float(t3.graded_attempted), 5.0)
+        self.assertEqual(float(t3.nongraded_earned), 0.0)
+        self.assertEqual(float(t3.total_attempted), 5.0)
+        self.assertEqual(float(t3.total_earned), 5.0)
+        self.assertEqual(float(t3.gpa), 3.90)
 
-        data = t2.to_dict()
-        self.assertEqual(data['deductible_credits'], 1.0)
-        self.assertEqual(data['grade_points'], 19.0)
-        self.assertEqual(data['graded_attempted'], 4.0)
-        self.assertEqual(data['nongraded_earned'], 2.0)
-        self.assertEqual(data['total_attempted'], 5.0)
-        self.assertEqual(data['total_earned'], 6.0)
+        # t2, computed attributes
+        self.assertEqual(t2.pk, 3)
+        self.assertEqual(float(t2.deductible_credits), 1.0)
+        self.assertEqual(float(t2.grade_points), 19.0)
+        self.assertEqual(float(t2.graded_attempted), 13.2)
+        self.assertEqual(float(t2.nongraded_earned), 2.0)
+        self.assertEqual(float(t2.total_attempted), 14.2)
+        self.assertEqual(float(t2.total_earned), 14.2)
+        self.assertEqual(float(t2.gpa), 1.34)

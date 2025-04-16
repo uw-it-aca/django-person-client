@@ -8,6 +8,7 @@ from django.forms import model_to_dict
 from uw_person_client.exceptions import (
     PersonNotFoundException, AdviserNotFoundException)
 from uw_pws import PWS, InvalidNetID, InvalidStudentSystemKey
+from decimal import Decimal
 
 
 class PersonQueueManager(models.Manager):
@@ -755,11 +756,11 @@ class Transcript(models.Model):
     resident = models.SmallIntegerField(blank=True, null=True)
     resident_cat = models.TextField(blank=True, null=True)
     qtr_grade_points = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=5, decimal_places=2, blank=True, null=True)
     qtr_graded_attmp = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     qtr_nongrd_attmp = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     class_code = models.SmallIntegerField(blank=True, null=True)
     honors_program = models.SmallIntegerField(blank=True, null=True)
     special_program = models.SmallIntegerField(blank=True, null=True)
@@ -770,23 +771,23 @@ class Transcript(models.Model):
     num_courses = models.SmallIntegerField(blank=True, null=True)
     enroll_status = models.SmallIntegerField(blank=True, null=True)
     tenth_day_credits = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     tr_en_stat_dt = models.DateTimeField(blank=True, null=True)
     last_changed = models.DateTimeField(
         db_column='_last_changed', blank=True, null=True)
     over_qtr_deduct = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     over_qtr_grade_at = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     over_qtr_grade_pt = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=5, decimal_places=2, blank=True, null=True)
     over_qtr_nongrd = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     qtr_comment = models.TextField(blank=True, null=True)
     qtr_deductible = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     qtr_nongrd_earned = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     add_to_cum = models.BooleanField(blank=True, null=True)
     scholarship_abbr = models.TextField(blank=True, null=True)
     scholarship_desc = models.TextField(blank=True, null=True)
@@ -811,35 +812,47 @@ class Transcript(models.Model):
         data['nongraded_earned'] = self.nongraded_earned
         data['total_attempted'] = self.total_attempted
         data['total_earned'] = self.total_earned
+        data['gpa'] = self.gpa
         return data
 
     @property
     def deductible_credits(self):
-        return self.over_qtr_deduct if (
-            self.over_qtr_deduct > 0) else self.qtr_deductible
+        return self.over_qtr_deduct if self.over_qtr_deduct else (
+            self.qtr_deductible if (
+                self.qtr_deductible is not None) else Decimal('0.0'))
 
     @property
     def grade_points(self):
-        return self.over_qtr_grade_pt if (
-            self.over_qtr_grade_pt > 0) else self.qtr_grade_points
+        return self.over_qtr_grade_pt if self.over_qtr_grade_pt else (
+            self.qtr_grade_points if (
+                self.qtr_grade_points is not None) else Decimal('0.0'))
 
     @property
     def graded_attempted(self):
-        return self.over_qtr_grade_at if (
-            self.over_qtr_grade_at > 0) else self.qtr_graded_attmp
+        return self.over_qtr_grade_at if self.over_qtr_grade_at else (
+            self.qtr_graded_attmp if (
+                self.qtr_graded_attmp is not None) else Decimal('0.0'))
 
     @property
     def nongraded_earned(self):
-        return self.over_qtr_nongrd if (
-            self.over_qtr_nongrd > 0) else self.qtr_nongrd_earned
+        return self.over_qtr_nongrd if self.over_qtr_nongrd else (
+            self.qtr_nongrd_earned if (
+                self.qtr_nongrd_earned is not None) else Decimal('0.0'))
 
     @property
     def total_attempted(self):
-        return self.graded_attempted + self.qtr_nongrd_attmp
+        return self.graded_attempted + (self.qtr_nongrd_attmp if (
+            self.qtr_nongrd_attmp is not None) else Decimal('0.0'))
 
     @property
     def total_earned(self):
-        return self.graded_attempted + self.nongraded_earned
+        return (self.graded_attempted - self.deductible_credits +
+                self.nongraded_earned)
+
+    @property
+    def gpa(self):
+        return Decimal(self.grade_points / self.total_attempted).quantize(
+            Decimal(10) ** -2)
 
 
 class Transfer(models.Model):
