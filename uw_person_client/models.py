@@ -756,11 +756,11 @@ class Transcript(models.Model):
     resident = models.SmallIntegerField(blank=True, null=True)
     resident_cat = models.TextField(blank=True, null=True)
     qtr_grade_points = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=5, decimal_places=2, blank=True, null=True)
     qtr_graded_attmp = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     qtr_nongrd_attmp = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     class_code = models.SmallIntegerField(blank=True, null=True)
     honors_program = models.SmallIntegerField(blank=True, null=True)
     special_program = models.SmallIntegerField(blank=True, null=True)
@@ -771,23 +771,23 @@ class Transcript(models.Model):
     num_courses = models.SmallIntegerField(blank=True, null=True)
     enroll_status = models.SmallIntegerField(blank=True, null=True)
     tenth_day_credits = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     tr_en_stat_dt = models.DateTimeField(blank=True, null=True)
     last_changed = models.DateTimeField(
         db_column='_last_changed', blank=True, null=True)
     over_qtr_deduct = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     over_qtr_grade_at = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     over_qtr_grade_pt = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=5, decimal_places=2, blank=True, null=True)
     over_qtr_nongrd = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     qtr_comment = models.TextField(blank=True, null=True)
     qtr_deductible = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     qtr_nongrd_earned = models.DecimalField(
-        max_digits=6, decimal_places=2, blank=True, null=True)
+        max_digits=3, decimal_places=1, blank=True, null=True)
     add_to_cum = models.BooleanField(blank=True, null=True)
     scholarship_abbr = models.TextField(blank=True, null=True)
     scholarship_desc = models.TextField(blank=True, null=True)
@@ -812,6 +812,7 @@ class Transcript(models.Model):
         data['nongraded_earned'] = self.nongraded_earned
         data['total_attempted'] = self.total_attempted
         data['total_earned'] = self.total_earned
+        data['gpa'] = self.gpa
         return data
 
     @property
@@ -847,6 +848,11 @@ class Transcript(models.Model):
     def total_earned(self):
         return (self.graded_attempted - self.deductible_credits +
                 self.nongraded_earned)
+
+    @property
+    def gpa(self):
+        return Decimal(self.grade_points / self.total_attempted).quantize(
+            Decimal(10) ** -2)
 
 
 class Transfer(models.Model):
