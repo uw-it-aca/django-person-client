@@ -61,3 +61,32 @@ class TranscriptTest(ModelTest):
         self.assertEqual(d2['total_attempted'], '14.2')
         self.assertEqual(d2['total_earned'], '14.2')
         self.assertEqual(d2['gpa'], '1.34')
+
+    def test_get_transcripts_errors(self):
+        p = Person.objects.get_person_by_uwnetid(
+            'jbothell', include_student=True, include_student_transcripts=True)
+
+        transcripts = p.student.transcripts.all()
+        self.assertEqual(len(transcripts), 1)
+
+        t1 = transcripts[0]
+
+        # t1, computed attributes
+        self.assertEqual(t1.pk, 2)
+        self.assertEqual(float(t1.deductible_credits), 0)
+        self.assertEqual(float(t1.grade_points), 41.2)
+        self.assertEqual(float(t1.graded_attempted), 0)
+        self.assertEqual(float(t1.nongraded_earned), 0)
+        self.assertEqual(float(t1.total_attempted), 0)
+        self.assertEqual(float(t1.total_earned), 0)
+        self.assertEqual(float(t1.gpa), 0)
+
+        # t2, to_dict
+        d1 = t1.to_dict()
+        self.assertEqual(d1['deductible_credits'], '0.0')
+        self.assertEqual(d1['grade_points'], '41.20')
+        self.assertEqual(d1['graded_attempted'], '0.0')
+        self.assertEqual(d1['nongraded_earned'], '0.0')
+        self.assertEqual(d1['total_attempted'], '0.0')
+        self.assertEqual(d1['total_earned'], '0.0')
+        self.assertEqual(d1['gpa'], '0.00')
