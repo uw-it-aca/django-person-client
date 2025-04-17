@@ -851,8 +851,11 @@ class Transcript(models.Model):
 
     @property
     def gpa(self):
-        return Decimal(self.grade_points / self.total_attempted).quantize(
-            Decimal(10) ** -2)
+        try:
+            return Decimal(self.grade_points / self.total_attempted).quantize(
+                Decimal('0.01'))
+        except Exception:
+            return Decimal('0.00')
 
 
 class Transfer(models.Model):
