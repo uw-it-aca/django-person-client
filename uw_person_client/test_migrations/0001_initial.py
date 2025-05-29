@@ -348,6 +348,19 @@ class Migration(migrations.Migration):
                 ('enroll_status_request_code', models.TextField(blank=True, null=True)),
                 ('enroll_status_desc', models.TextField(blank=True, null=True)),
                 ('special_program_desc', models.TextField(blank=True, null=True)),
+                ('cmp_qtr_deductible_credits', models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)),
+                ('cmp_qtr_grade_points', models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)),
+                ('cmp_qtr_graded_attempted', models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)),
+                ('cmp_qtr_nongraded_earned', models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)),
+                ('cmp_qtr_total_attempted', models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)),
+                ('cmp_qtr_total_earned', models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)),
+                ('cmp_qtr_gpa', models.TextField(blank=True, null=True)),
+                ('cmp_cum_total_attempted', models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)),
+                ('cmp_cum_graded_attempted', models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)),
+                ('cmp_cum_grade_points', models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)),
+                ('cmp_cum_gpa', models.TextField(blank=True, null=True)),
+                ('cmp_cum_uw_earned', models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)),
+                ('cmp_cum_total_earned', models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)),
                 ('leave_ends_term', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='transcript_leave_ends_term_set', to='uw_person_client.term')),
                 ('student', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='uw_person_client.student')),
                 ('tran_term', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='uw_person_client.term')),
@@ -355,6 +368,7 @@ class Migration(migrations.Migration):
             options={
                 'db_table': 'transcript',
                 'managed': True,
+                'ordering': ['-tran_term__year', '-tran_term__quarter']
             },
         ),
         migrations.CreateModel(
@@ -473,6 +487,7 @@ class Migration(migrations.Migration):
                 'db_table': 'student_hold',
                 'managed': True,
                 'unique_together': {('student', 'seq')},
+                'ordering': ['seq'],
             },
         ),
         migrations.CreateModel(
