@@ -8,7 +8,6 @@ from django.forms import model_to_dict
 from uw_person_client.exceptions import (
     PersonNotFoundException, AdviserNotFoundException)
 from uw_pws import PWS, InvalidNetID, InvalidStudentSystemKey
-from decimal import Decimal
 
 
 class PersonQueueManager(models.Manager):
@@ -794,6 +793,30 @@ class Transcript(models.Model):
     enroll_status_request_code = models.TextField(blank=True, null=True)
     enroll_status_desc = models.TextField(blank=True, null=True)
     special_program_desc = models.TextField(blank=True, null=True)
+    cmp_qtr_deductible_credits = models.DecimalField(
+        max_digits=3, decimal_places=1, blank=True, null=True)
+    cmp_qtr_grade_points = models.DecimalField(
+        max_digits=5, decimal_places=2, blank=True, null=True)
+    cmp_qtr_graded_attempted = models.DecimalField(
+        max_digits=3, decimal_places=1, blank=True, null=True)
+    cmp_qtr_nongraded_earned = models.DecimalField(
+        max_digits=3, decimal_places=1, blank=True, null=True)
+    cmp_qtr_total_attempted = models.DecimalField(
+        max_digits=3, decimal_places=1, blank=True, null=True)
+    cmp_qtr_total_earned = models.DecimalField(
+        max_digits=3, decimal_places=1, blank=True, null=True)
+    cmp_qtr_gpa = models.TextField(blank=True, null=True)
+    cmp_cum_total_attempted = models.DecimalField(
+        max_digits=3, decimal_places=1, blank=True, null=True)
+    cmp_cum_graded_attempted = models.DecimalField(
+        max_digits=3, decimal_places=1, blank=True, null=True)
+    cmp_cum_grade_points = models.DecimalField(
+        max_digits=5, decimal_places=2, blank=True, null=True)
+    cmp_cum_gpa = models.TextField(blank=True, null=True)
+    cmp_cum_uw_earned = models.DecimalField(
+        max_digits=3, decimal_places=1, blank=True, null=True)
+    cmp_cum_total_earned = models.DecimalField(
+        max_digits=3, decimal_places=1, blank=True, null=True)
 
     class Meta:
         db_table = 'transcript'
@@ -806,56 +829,7 @@ class Transcript(models.Model):
             data['tran_term'] = self.tran_term.to_dict()
         if self.leave_ends_term is not None:
             data['leave_ends_term'] = self.leave_ends_term.to_dict()
-        data['deductible_credits'] = str(self.deductible_credits)
-        data['grade_points'] = str(self.grade_points)
-        data['graded_attempted'] = str(self.graded_attempted)
-        data['nongraded_earned'] = str(self.nongraded_earned)
-        data['total_attempted'] = str(self.total_attempted)
-        data['total_earned'] = str(self.total_earned)
-        data['gpa'] = str(self.gpa)
         return data
-
-    @property
-    def deductible_credits(self):
-        return self.over_qtr_deduct if self.over_qtr_deduct else (
-            self.qtr_deductible if (
-                self.qtr_deductible is not None) else Decimal('0.0'))
-
-    @property
-    def grade_points(self):
-        return self.over_qtr_grade_pt if self.over_qtr_grade_pt else (
-            self.qtr_grade_points if (
-                self.qtr_grade_points is not None) else Decimal('0.0'))
-
-    @property
-    def graded_attempted(self):
-        return self.over_qtr_grade_at if self.over_qtr_grade_at else (
-            self.qtr_graded_attmp if (
-                self.qtr_graded_attmp is not None) else Decimal('0.0'))
-
-    @property
-    def nongraded_earned(self):
-        return self.over_qtr_nongrd if self.over_qtr_nongrd else (
-            self.qtr_nongrd_earned if (
-                self.qtr_nongrd_earned is not None) else Decimal('0.0'))
-
-    @property
-    def total_attempted(self):
-        return self.graded_attempted + (self.qtr_nongrd_attmp if (
-            self.qtr_nongrd_attmp is not None) else Decimal('0.0'))
-
-    @property
-    def total_earned(self):
-        return (self.graded_attempted - self.deductible_credits +
-                self.nongraded_earned)
-
-    @property
-    def gpa(self):
-        try:
-            return Decimal(self.grade_points / self.total_attempted).quantize(
-                Decimal('0.01'))
-        except Exception:
-            return Decimal('0.00')
 
 
 class Transfer(models.Model):
