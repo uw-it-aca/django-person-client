@@ -794,29 +794,33 @@ class Transcript(models.Model):
     enroll_status_desc = models.TextField(blank=True, null=True)
     special_program_desc = models.TextField(blank=True, null=True)
     cmp_qtr_deductible_credits = models.DecimalField(
-        max_digits=3, decimal_places=1, blank=True, null=True)
+        max_digits=5, decimal_places=1, blank=True, null=True)
     cmp_qtr_grade_points = models.DecimalField(
-        max_digits=5, decimal_places=2, blank=True, null=True)
+        max_digits=6, decimal_places=2, blank=True, null=True)
     cmp_qtr_graded_attempted = models.DecimalField(
-        max_digits=3, decimal_places=1, blank=True, null=True)
+        max_digits=5, decimal_places=1, blank=True, null=True)
     cmp_qtr_nongraded_earned = models.DecimalField(
-        max_digits=3, decimal_places=1, blank=True, null=True)
+        max_digits=5, decimal_places=1, blank=True, null=True)
     cmp_qtr_total_attempted = models.DecimalField(
-        max_digits=3, decimal_places=1, blank=True, null=True)
+        max_digits=5, decimal_places=1, blank=True, null=True)
+    cmp_qtr_graded_earned = models.DecimalField(
+        max_digits=5, decimal_places=1, blank=True, null=True)
     cmp_qtr_total_earned = models.DecimalField(
-        max_digits=3, decimal_places=1, blank=True, null=True)
+        max_digits=5, decimal_places=1, blank=True, null=True)
     cmp_qtr_gpa = models.TextField(blank=True, null=True)
     cmp_cum_total_attempted = models.DecimalField(
-        max_digits=3, decimal_places=1, blank=True, null=True)
+        max_digits=5, decimal_places=1, blank=True, null=True)
     cmp_cum_graded_attempted = models.DecimalField(
-        max_digits=3, decimal_places=1, blank=True, null=True)
+        max_digits=5, decimal_places=1, blank=True, null=True)
     cmp_cum_grade_points = models.DecimalField(
-        max_digits=5, decimal_places=2, blank=True, null=True)
+        max_digits=6, decimal_places=2, blank=True, null=True)
     cmp_cum_gpa = models.TextField(blank=True, null=True)
+    cmp_cum_graded_earned = models.DecimalField(
+        max_digits=5, decimal_places=1, blank=True, null=True)
     cmp_cum_uw_earned = models.DecimalField(
-        max_digits=3, decimal_places=1, blank=True, null=True)
+        max_digits=5, decimal_places=1, blank=True, null=True)
     cmp_cum_total_earned = models.DecimalField(
-        max_digits=3, decimal_places=1, blank=True, null=True)
+        max_digits=5, decimal_places=1, blank=True, null=True)
 
     class Meta:
         db_table = 'transcript'
