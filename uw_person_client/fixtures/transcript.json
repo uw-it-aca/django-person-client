@@ -41,12 +41,14 @@
             "cmp_cum_grade_points": 2.0,
             "cmp_cum_graded_attempted": 1.0,
             "cmp_cum_total_attempted": 4.0,
+            "cmp_cum_graded_earned": 4.0,
             "cmp_cum_total_earned": 8.5,
             "cmp_cum_uw_earned": 3.5,
             "cmp_qtr_deductible_credits": 0.5,
             "cmp_qtr_gpa": "2.00",
             "cmp_qtr_grade_points": 2.0,
             "cmp_qtr_graded_attempted": 1.0,
+            "cmp_qtr_graded_earned": 1.0,
             "cmp_qtr_nongraded_earned": 3.0,
             "cmp_qtr_total_attempted": 4.0,
             "cmp_qtr_total_earned": 3.5
@@ -94,6 +96,7 @@
             "cmp_cum_grade_points": 3.7,
             "cmp_cum_graded_attempted": 2.0,
             "cmp_cum_total_attempted": 4.0,
+            "cmp_cum_graded_earned": 2.0,
             "cmp_cum_total_earned": 9.0,
             "cmp_cum_uw_earned": 4.0,
             "cmp_qtr_deductible_credits": 0,
@@ -102,6 +105,7 @@
             "cmp_qtr_graded_attempted": 2.0,
             "cmp_qtr_nongraded_earned": 2.0,
             "cmp_qtr_total_attempted": 4.0,
+            "cmp_qtr_graded_earned": 2.0,
             "cmp_qtr_total_earned": 4.0
         }
     },
@@ -147,6 +151,7 @@
             "cmp_cum_grade_points": 2.8,
             "cmp_cum_graded_attempted": 2.0,
             "cmp_cum_total_attempted": 3.0,
+            "cmp_cum_graded_earned": 2.0,
             "cmp_cum_total_earned": 8.0,
             "cmp_cum_uw_earned": 3.0,
             "cmp_qtr_deductible_credits": 0,
@@ -154,6 +159,7 @@
             "cmp_qtr_grade_points": 2.8,
             "cmp_qtr_graded_attempted": 2.0,
             "cmp_qtr_nongraded_earned": 1.0,
+            "cmp_qtr_graded_earned": 2.0,
             "cmp_qtr_total_attempted": 3.0,
             "cmp_qtr_total_earned": 3.0
         }
@@ -200,6 +206,7 @@
             "cmp_cum_grade_points": 2.8,
             "cmp_cum_graded_attempted": 2.0,
             "cmp_cum_total_attempted": 3.0,
+            "cmp_cum_graded_earned": 2.0,
             "cmp_cum_total_earned": 8.0,
             "cmp_cum_uw_earned": 3.0,
             "cmp_qtr_deductible_credits": 0,
@@ -208,6 +215,7 @@
             "cmp_qtr_graded_attempted": 2.0,
             "cmp_qtr_nongraded_earned": 1.0,
             "cmp_qtr_total_attempted": 3.0,
+            "cmp_qtr_graded_earned": 2.0,
             "cmp_qtr_total_earned": 3.0
         }
     }
