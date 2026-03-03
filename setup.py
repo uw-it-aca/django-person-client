@@ -21,7 +21,7 @@ setup(
     name='Django-Person-Client',
     version=VERSION,
     packages=['uw_person_client'],
-    author="UW-IT Student & Educational Technology Services",
+    author="UWIT Student & Educational Technology Services",
     author_email="aca-it@uw.edu",
     include_package_data=True,
     install_requires=[
