@@ -2,10 +2,6 @@ ARG DJANGO_CONTAINER_VERSION=3.0.2
 
 FROM us-docker.pkg.dev/uwit-mci-axdd/containers/django-container:${DJANGO_CONTAINER_VERSION} AS app-container
 
-USER root
-
-RUN apt-get update && apt-get install libpq-dev -y
-
 USER acait
 
 ADD --chown=acait:acait . /app/
@@ -17,11 +13,5 @@ RUN chmod u+x /scripts/app_start.sh
 RUN /app/bin/pip install -r requirements.txt
 
 FROM us-docker.pkg.dev/uwit-mci-axdd/containers/django-test-container:${DJANGO_CONTAINER_VERSION} AS app-test-container
-
-USER root
-
-RUN apt-get update && apt-get install libpq-dev -y
-
-USER acait
 
 COPY --from=app-container /app/ /app/
