@@ -26,7 +26,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'django>=4.2,<6',
-        'psycopg2',
+        'psycopg',
         'uw-restclients-pws',
     ],
     license='Apache License, Version 2.0',
