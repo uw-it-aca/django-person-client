@@ -2,6 +2,7 @@ from .base_settings import *
 
 INSTALLED_APPS += [
     'uw_person_client',
+    'django.contrib.postgres',
 ]
 
 DATABASES = {
