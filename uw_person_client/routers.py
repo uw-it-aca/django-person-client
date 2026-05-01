@@ -3,6 +3,10 @@
 
 
 class UWPersonRouter():
+    """
+    A Django database router for projects that configure 'default' and
+    'uw_person' databases.
+    """
     def db_for_read(self, model, **hints):
         if model._meta.app_label == 'uw_person_client':
             return 'uw_person'
