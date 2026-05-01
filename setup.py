@@ -22,7 +22,7 @@ setup(
     author_email="aca-it@uw.edu",
     include_package_data=True,
     install_requires=[
-        'django>=4.2,<6',
+        'django~=5.2',
         'uw-restclients-pws',
     ],
     license='Apache License, Version 2.0',

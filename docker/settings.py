@@ -1,4 +1,5 @@
 from .base_settings import *
+import os
 
 INSTALLED_APPS += [
     'uw_person_client',
@@ -13,6 +14,9 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
+        'OPTIONS': {
+            'pool': {'min_size': 1, 'max_size': 2},
+        },
     },
 }
 
