@@ -5,6 +5,7 @@ from django.test import TestCase
 
 
 class ModelTest(TestCase):
+    databases = '__all__'
     fixtures = ['person.json', 'employee.json', 'term.json', 'major.json',
                 'student.json', 'adviser.json', 'transfer.json',
                 'transcript.json', 'hold.json', 'degree.json', 'sport.json']
