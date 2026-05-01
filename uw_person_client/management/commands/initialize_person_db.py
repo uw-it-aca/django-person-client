@@ -17,13 +17,23 @@ class Command(BaseCommand):
             m._meta.app_label == 'uw_person_client' and
             m._meta.managed is False)]
 
-        connection = connections['uw_person']
+        connection = self.get_person_connection()
         existing_tables = connection.introspection.table_names()
 
         with connection.schema_editor() as schema_editor:
             for model in unmanaged_models:
                 if model._meta.db_table not in existing_tables:
                     schema_editor.create_model(model)
+
+    def get_person_connection(self):
+        if 'uw_person' not in connections.databases:
+            raise CommandError(
+                'The "uw_person" database alias is not configured. '
+                'Add a "uw_person" entry to DATABASES and ensure any '
+                'database router configuration routes uw_person_client '
+                'models to that alias.'
+            )
+        return connections['uw_person']
 
     def handle(self, *args, **options):
         if os.getenv('ENV', '') != 'localdev':
@@ -36,5 +46,5 @@ class Command(BaseCommand):
                 'person.json', 'employee.json', 'term.json', 'major.json',
                 'student.json', 'adviser.json', 'transfer.json',
                 'transcript.json', 'hold.json', 'degree.json', 'sport.json']:
-            call_command('loaddata', fixture, '--database', 'uw_person',
-                         '--app', 'uw_person_client')
+            call_command('loaddata', fixture, database='uw_person',
+                         app_label='uw_person_client')

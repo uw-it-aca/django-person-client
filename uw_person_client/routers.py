@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-class UWPersonRouter():
+class UWPersonRouter:
     """
     A Django database router for projects that configure 'default' and
     'uw_person' databases.
