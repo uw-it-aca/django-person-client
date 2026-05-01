@@ -8,6 +8,8 @@ from uw_person_client.models import (
 
 
 class PersonQueueTest(TestCase):
+    databases = '__all__'
+
     def test_add_to_queue(self):
         self.assertTrue(PersonQueue.objects.add_to_queue('jadviser'))
         self.assertTrue(PersonQueue.objects.add_to_queue('nobody'))
@@ -16,6 +18,8 @@ class PersonQueueTest(TestCase):
 
 
 class EnrolledStudentQueueTest(TestCase):
+    databases = '__all__'
+
     def test_add_to_queue(self):
         self.assertTrue(EnrolledStudentQueue.objects.add_to_queue('123456789'))
         self.assertRaises(
